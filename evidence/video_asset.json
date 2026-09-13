@@ -1,0 +1,49 @@
+{
+  "release": "1.7.0",
+  "source_name": "hailuo-2_3_FLEETMESH_LEONARDO_VIDEO_SETUP_Use_the_clean_01_Opening_Frame.png_from_FleetMesh-0.mp4",
+  "source_sha256": "0e0706f1545027f14492999289c5b4de238910773838bd6ac96d4695753ecbed",
+  "source_bytes": 1692275,
+  "source_duration": 5.875,
+  "provenance": "User-supplied generated warehouse clip following the Leonardo/Hailuo setup. Filename identifies Hailuo 2.3; the generation job itself was not inspected. Illustrative footage, not physical FleetMesh validation.",
+  "file": "web/media/warehouse-film.mp4",
+  "sha256": "55a84ba0be7e94f9c3f8e06d2f8454543d754dfc536be377e3faa650db0202cc",
+  "bytes": 5290075,
+  "codec": "h264",
+  "width": 1376,
+  "height": 768,
+  "fps": 24,
+  "duration_seconds": 5.875,
+  "frames": 141,
+  "audio_streams": 0,
+  "keyframes": 47,
+  "max_keyframe_interval_frames": 3,
+  "boxes": [
+    {
+      "type": "ftyp",
+      "offset": 0,
+      "bytes": 32
+    },
+    {
+      "type": "moov",
+      "offset": 32,
+      "bytes": 2719
+    },
+    {
+      "type": "free",
+      "offset": 2751,
+      "bytes": 8
+    },
+    {
+      "type": "mdat",
+      "offset": 2759,
+      "bytes": 5287316
+    }
+  ],
+  "fast_start": true,
+  "full_software_decode_passed": true,
+  "browser_playback_verified": false,
+  "visual_review": "Twelve frames sampled at 0.5-second intervals, plus full-size opening and near-final frames. Dark warehouse, three carton-loaded AMRs, gentle rising camera; no website UI burned into the scene. Small generated markings are not authoritative robot identifiers. No blocked-junction maneuver or network-failure demonstration is established by this footage.",
+  "poster": "web/media/warehouse-film-poster.webp",
+  "poster_source_seconds": 0.04,
+  "poster_sha256": "b051a73572595d0e4b9aec5e143bf36ae9a68fb57f3cfcd68aaa25b71ea1d1f5"
+}

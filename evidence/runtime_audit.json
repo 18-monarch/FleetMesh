@@ -1,0 +1,139 @@
+{
+  "version": "1.2.0",
+  "scope": "Six predeclared functional process checks on one Linux host; not a speed benchmark or physical validation.",
+  "passed": true,
+  "cases": [
+    {
+      "seed": 9410,
+      "map": "compact",
+      "robots": 3,
+      "jobs": 9,
+      "scenario": "normal",
+      "policy": "heuristic",
+      "seconds": 145.7,
+      "complete": 9,
+      "collisions": 0,
+      "minimum_separation": 2.0,
+      "wall_seconds": 1.08,
+      "checks": {
+        "exclusive_held_zones": true,
+        "unique_active_jobs": true,
+        "completed": true,
+        "zero_detected_collisions": true,
+        "distinct_processes": true,
+        "each_job_delivered_once": true,
+        "no_dead_peers": true
+      }
+    },
+    {
+      "seed": 9411,
+      "map": "warehouse",
+      "robots": 4,
+      "jobs": 9,
+      "scenario": "network",
+      "policy": "heuristic",
+      "seconds": 192.9,
+      "complete": 9,
+      "collisions": 0,
+      "minimum_separation": 2.0,
+      "wall_seconds": 1.787,
+      "checks": {
+        "exclusive_held_zones": true,
+        "unique_active_jobs": true,
+        "completed": true,
+        "zero_detected_collisions": true,
+        "distinct_processes": true,
+        "each_job_delivered_once": true,
+        "no_dead_peers": true
+      }
+    },
+    {
+      "seed": 9412,
+      "map": "extended",
+      "robots": 6,
+      "jobs": 12,
+      "scenario": "network",
+      "policy": "heuristic",
+      "seconds": 287.0,
+      "complete": 12,
+      "collisions": 0,
+      "minimum_separation": 2.0,
+      "wall_seconds": 3.94,
+      "checks": {
+        "exclusive_held_zones": true,
+        "unique_active_jobs": true,
+        "completed": true,
+        "zero_detected_collisions": true,
+        "distinct_processes": true,
+        "each_job_delivered_once": true,
+        "no_dead_peers": true
+      }
+    },
+    {
+      "seed": 9413,
+      "map": "warehouse",
+      "robots": 3,
+      "jobs": 9,
+      "scenario": "blocked",
+      "policy": "heuristic",
+      "seconds": 181.6,
+      "complete": 9,
+      "collisions": 0,
+      "minimum_separation": 2.0,
+      "wall_seconds": 1.327,
+      "checks": {
+        "exclusive_held_zones": true,
+        "unique_active_jobs": true,
+        "completed": true,
+        "zero_detected_collisions": true,
+        "distinct_processes": true,
+        "each_job_delivered_once": true,
+        "no_dead_peers": true
+      }
+    },
+    {
+      "seed": 9414,
+      "map": "extended",
+      "robots": 6,
+      "jobs": 12,
+      "scenario": "congestion",
+      "policy": "heuristic",
+      "seconds": 200.0,
+      "complete": 12,
+      "collisions": 0,
+      "minimum_separation": 2.0,
+      "wall_seconds": 2.545,
+      "checks": {
+        "exclusive_held_zones": true,
+        "unique_active_jobs": true,
+        "completed": true,
+        "zero_detected_collisions": true,
+        "distinct_processes": true,
+        "each_job_delivered_once": true,
+        "no_dead_peers": true
+      }
+    },
+    {
+      "seed": 9415,
+      "map": "warehouse",
+      "robots": 3,
+      "jobs": 30,
+      "scenario": "normal",
+      "policy": "heuristic",
+      "seconds": 673.0,
+      "complete": 30,
+      "collisions": 0,
+      "minimum_separation": 2.0,
+      "wall_seconds": 7.816,
+      "checks": {
+        "exclusive_held_zones": true,
+        "unique_active_jobs": true,
+        "completed": true,
+        "zero_detected_collisions": true,
+        "distinct_processes": true,
+        "each_job_delivered_once": true,
+        "no_dead_peers": true
+      }
+    }
+  ]
+}

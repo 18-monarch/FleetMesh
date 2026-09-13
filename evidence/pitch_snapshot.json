@@ -1,0 +1,474 @@
+{
+  "time": 20.0,
+  "robots": [
+    {
+      "id": 0,
+      "position": [
+        -2.0,
+        0.0
+      ],
+      "node": "H0",
+      "home": "H0",
+      "active": "J004",
+      "stage": "reserving",
+      "available": true,
+      "held": [],
+      "request": "ROUTE",
+      "grants": 0,
+      "route": [
+        "H0",
+        "N00",
+        "N10",
+        "N11",
+        "N10",
+        "N00",
+        "H0"
+      ],
+      "reason": "Waiting for peer permission at ROUTE",
+      "wait_seconds": 3.2,
+      "distance": 20.0,
+      "battery": 99.5,
+      "model_calls": 0,
+      "transfers": 0,
+      "reroutes": 0,
+      "alive": true,
+      "pid": 7,
+      "step_ms": 0.055,
+      "sent": 307,
+      "received": 417,
+      "lost": 0,
+      "rejected": 0
+    },
+    {
+      "id": 1,
+      "position": [
+        -2.0,
+        8.0
+      ],
+      "node": "H1",
+      "home": "H1",
+      "active": "J002",
+      "stage": "reserving",
+      "available": true,
+      "held": [],
+      "request": "ROUTE",
+      "grants": 1,
+      "route": [
+        "H1",
+        "N02",
+        "N12",
+        "N22",
+        "N32",
+        "N22",
+        "N12",
+        "N02",
+        "N01",
+        "N00",
+        "N01",
+        "N02",
+        "H1"
+      ],
+      "reason": "Waiting for peer permission at ROUTE",
+      "wait_seconds": 19.8,
+      "distance": 0.0,
+      "battery": 100.0,
+      "model_calls": 0,
+      "transfers": 0,
+      "reroutes": 0,
+      "alive": true,
+      "pid": 8,
+      "step_ms": 0.042,
+      "sent": 514,
+      "received": 340,
+      "lost": 0,
+      "rejected": 0
+    },
+    {
+      "id": 2,
+      "position": [
+        12.0,
+        1.1318331356193125
+      ],
+      "node": "N30",
+      "home": "H2",
+      "active": "J006",
+      "stage": "pickup",
+      "available": true,
+      "held": [
+        "N00",
+        "N01",
+        "N02",
+        "N10",
+        "N12",
+        "N20",
+        "N22",
+        "N30",
+        "N31",
+        "N32"
+      ],
+      "request": null,
+      "grants": 0,
+      "route": [
+        "N30",
+        "N31",
+        "N32",
+        "N22",
+        "N12",
+        "N02",
+        "N01",
+        "N00",
+        "N10",
+        "N20",
+        "N30",
+        "H2"
+      ],
+      "reason": "Going to pickup",
+      "wait_seconds": 17.0,
+      "distance": 3.13,
+      "battery": 99.9,
+      "model_calls": 0,
+      "transfers": 1,
+      "reroutes": 0,
+      "alive": true,
+      "pid": 9,
+      "step_ms": 0.054,
+      "sent": 369,
+      "received": 432,
+      "lost": 0,
+      "rejected": 0
+    }
+  ],
+  "jobs": [
+    {
+      "id": "J001",
+      "pickup": "N00",
+      "drop": "N11",
+      "priority": 1,
+      "steward": 0,
+      "created": 0.0,
+      "owner": 0,
+      "version": 5,
+      "state": "done",
+      "ready": true,
+      "carrying": false,
+      "delivered_at": 8.7,
+      "completed_at": 17.0
+    },
+    {
+      "created": 0.0,
+      "drop": "N00",
+      "id": "J002",
+      "owner": 1,
+      "pickup": "N32",
+      "priority": 1,
+      "ready": true,
+      "state": "reserved",
+      "steward": 1,
+      "version": 2
+    },
+    {
+      "id": "J003",
+      "pickup": "N02",
+      "drop": "N31",
+      "priority": 1,
+      "steward": 2,
+      "created": 0.0,
+      "owner": 1,
+      "version": 1,
+      "state": "queued",
+      "ready": true
+    },
+    {
+      "id": "J004",
+      "pickup": "N11",
+      "drop": "N00",
+      "priority": 1,
+      "steward": 0,
+      "created": 0.0,
+      "owner": 0,
+      "version": 2,
+      "state": "reserved",
+      "ready": true
+    },
+    {
+      "created": 0.0,
+      "drop": "N21",
+      "id": "J005",
+      "owner": 1,
+      "pickup": "N32",
+      "priority": 1,
+      "ready": true,
+      "state": "queued",
+      "steward": 1,
+      "version": 1
+    },
+    {
+      "created": 0.0,
+      "drop": "N02",
+      "id": "J006",
+      "owner": 2,
+      "pickup": "N32",
+      "priority": 1,
+      "ready": true,
+      "state": "reserved",
+      "steward": 2,
+      "version": 2
+    }
+  ],
+  "collisions": 0,
+  "minimum_separation": 4.472,
+  "complete": 1,
+  "total_jobs": 6,
+  "delivered": 1,
+  "wait_seconds": 40.0,
+  "distance": 23.13,
+  "transfers": 1,
+  "reroutes": 0,
+  "map_changes": {},
+  "pending_closures": [],
+  "partitioned": false,
+  "events": [
+    {
+      "time": 0.1,
+      "robot": 0,
+      "kind": "mission",
+      "detail": "J001: reserving 3 road zones"
+    },
+    {
+      "time": 0.2,
+      "robot": 1,
+      "kind": "mission",
+      "detail": "J002: reserving 6 road zones"
+    },
+    {
+      "time": 0.2,
+      "robot": 2,
+      "kind": "mission",
+      "detail": "J006: reserving 10 road zones"
+    },
+    {
+      "time": 0.4,
+      "robot": 0,
+      "kind": "depart",
+      "detail": "J001: all route permissions received"
+    },
+    {
+      "time": 0.6,
+      "robot": 2,
+      "kind": "transfer",
+      "detail": "J003 handed to R2 before pickup"
+    },
+    {
+      "time": 0.7,
+      "robot": 0,
+      "kind": "transfer",
+      "detail": "J003 ownership committed to R2"
+    },
+    {
+      "time": 0.7,
+      "robot": 1,
+      "kind": "transfer",
+      "detail": "J003 ownership committed to R2"
+    },
+    {
+      "time": 2.1,
+      "robot": 0,
+      "kind": "pickup",
+      "detail": "J001 package picked up"
+    },
+    {
+      "time": 8.7,
+      "robot": 0,
+      "kind": "delivery",
+      "detail": "J001 delivered; returning to dock"
+    },
+    {
+      "time": 17.0,
+      "robot": 0,
+      "kind": "complete",
+      "detail": "J001 complete and docked"
+    },
+    {
+      "time": 17.1,
+      "robot": 0,
+      "kind": "mission",
+      "detail": "J004: reserving 3 road zones"
+    },
+    {
+      "time": 17.2,
+      "robot": 2,
+      "kind": "depart",
+      "detail": "J006: all route permissions received"
+    }
+  ],
+  "map": {
+    "name": "warehouse",
+    "nodes": {
+      "N00": [
+        0.0,
+        0.0
+      ],
+      "N01": [
+        0.0,
+        4.0
+      ],
+      "N02": [
+        0.0,
+        8.0
+      ],
+      "N10": [
+        4.0,
+        0.0
+      ],
+      "N11": [
+        4.0,
+        4.0
+      ],
+      "N12": [
+        4.0,
+        8.0
+      ],
+      "N20": [
+        8.0,
+        0.0
+      ],
+      "N21": [
+        8.0,
+        4.0
+      ],
+      "N22": [
+        8.0,
+        8.0
+      ],
+      "N30": [
+        12.0,
+        0.0
+      ],
+      "N31": [
+        12.0,
+        4.0
+      ],
+      "N32": [
+        12.0,
+        8.0
+      ],
+      "H0": [
+        -2.0,
+        0.0
+      ],
+      "H1": [
+        -2.0,
+        8.0
+      ],
+      "H2": [
+        14.0,
+        0.0
+      ]
+    },
+    "edges": [
+      [
+        "N00",
+        "N10"
+      ],
+      [
+        "N00",
+        "N01"
+      ],
+      [
+        "N01",
+        "N11"
+      ],
+      [
+        "N01",
+        "N02"
+      ],
+      [
+        "N02",
+        "N12"
+      ],
+      [
+        "N10",
+        "N20"
+      ],
+      [
+        "N10",
+        "N11"
+      ],
+      [
+        "N11",
+        "N21"
+      ],
+      [
+        "N11",
+        "N12"
+      ],
+      [
+        "N12",
+        "N22"
+      ],
+      [
+        "N20",
+        "N30"
+      ],
+      [
+        "N20",
+        "N21"
+      ],
+      [
+        "N21",
+        "N31"
+      ],
+      [
+        "N21",
+        "N22"
+      ],
+      [
+        "N22",
+        "N32"
+      ],
+      [
+        "N30",
+        "N31"
+      ],
+      [
+        "N31",
+        "N32"
+      ],
+      [
+        "H0",
+        "N00"
+      ],
+      [
+        "H1",
+        "N02"
+      ],
+      [
+        "H2",
+        "N30"
+      ]
+    ],
+    "homes": [
+      "H0",
+      "H1",
+      "H2"
+    ],
+    "stations": [
+      "N00",
+      "N01",
+      "N02",
+      "N10",
+      "N11",
+      "N12",
+      "N20",
+      "N21",
+      "N22",
+      "N30",
+      "N31",
+      "N32"
+    ],
+    "width": 4,
+    "height": 3
+  },
+  "policy": "heuristic",
+  "config_seed": 200
+}

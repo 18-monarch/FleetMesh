@@ -1,0 +1,116 @@
+{
+  "version": "1.0.0",
+  "metric": "Mission makespan: start through final delivery and return to dock",
+  "training": {
+    "version": 1,
+    "type": "ridge regression",
+    "features": [
+      "bias",
+      "remaining_peer_hold_seconds",
+      "waiting_peers"
+    ],
+    "training_map": "compact",
+    "training_seeds": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "training_samples": 315,
+    "limits": "Synthetic road-zone waits. No physical robot validation."
+  },
+  "cohorts": [
+    {
+      "map": "compact",
+      "scenario": "normal",
+      "seeds": 8,
+      "mean_seconds": {
+        "baseline": 148.0375,
+        "atomic": 131.1375,
+        "heuristic": 130.4625,
+        "predictive": 131.35
+      },
+      "predictive_change_pct": 11.272481634720933,
+      "collisions": 0,
+      "completed": 32,
+      "runs": 32
+    },
+    {
+      "map": "warehouse",
+      "scenario": "normal",
+      "seeds": 8,
+      "mean_seconds": {
+        "baseline": 170.55,
+        "atomic": 145.9375,
+        "heuristic": 138.6375,
+        "predictive": 140.3125
+      },
+      "predictive_change_pct": 17.729404866608036,
+      "collisions": 0,
+      "completed": 32,
+      "runs": 32
+    },
+    {
+      "map": "extended",
+      "scenario": "congestion",
+      "seeds": 8,
+      "mean_seconds": {
+        "baseline": 190.1375,
+        "atomic": 161.5375,
+        "heuristic": 142.25,
+        "predictive": 144.0
+      },
+      "predictive_change_pct": 24.265334297547824,
+      "collisions": 0,
+      "completed": 32,
+      "runs": 32
+    },
+    {
+      "map": "warehouse",
+      "scenario": "network",
+      "seeds": 8,
+      "mean_seconds": {
+        "baseline": 183.85,
+        "atomic": 143.0875,
+        "heuristic": 136.1,
+        "predictive": 135.9375
+      },
+      "predictive_change_pct": 26.060647266793577,
+      "collisions": 0,
+      "completed": 32,
+      "runs": 32
+    },
+    {
+      "map": "warehouse",
+      "scenario": "blocked",
+      "seeds": 8,
+      "mean_seconds": {
+        "baseline": 176.075,
+        "atomic": 149.175,
+        "heuristic": 141.375,
+        "predictive": 142.8625
+      },
+      "predictive_change_pct": 18.86270055374129,
+      "collisions": 0,
+      "completed": 32,
+      "runs": 32
+    }
+  ],
+  "total_runs": 160,
+  "collisions": 0,
+  "completed": 160,
+  "limits": [
+    "Finite synthetic scenarios; shared graph families.",
+    "No physical, Wi-Fi or certification claims.",
+    "No general 20% guarantee.",
+    "No statistical confidence intervals."
+  ]
+}

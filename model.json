@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "type": "ridge regression",
+  "features": [
+    "bias",
+    "remaining_peer_hold_seconds",
+    "waiting_peers"
+  ],
+  "weights": [
+    2.5793260213193596,
+    0.9073956315301914,
+    31.289486354562584
+  ],
+  "training_map": "compact",
+  "training_seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+  ],
+  "training_samples": 315,
+  "limits": "Synthetic road-zone waits. No physical robot validation."
+}

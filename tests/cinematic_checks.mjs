@@ -1,0 +1,67 @@
+/* Actual sequence/page code with deterministic image/DOM stubs; not browser visual QA. */
+import assert from 'node:assert/strict';
+import vm from 'node:vm';
+import {readFileSync,writeFileSync} from 'node:fs';
+import * as journey from '../web/journey.js';
+import {ScrollSequence} from '../web/sequence-player.js';
+const checks=[],pass=name=>checks.push(name);
+const evidence=JSON.parse(readFileSync(new URL('../evidence/summary.json',import.meta.url)));
+const html=readFileSync(new URL('../web/experience.html',import.meta.url),'utf8');
+const count=Number(html.match(/data-count="(\d+)"/)[1]);assert.equal(count,141);
+const template=html.match(/data-frames="([^"]+)"/)[1].replace('__VERSION__','1.8.0');
+function scheduler(){let id=0,time=0;const frames=new Map(),timers=new Map();return {frames,timers,raf:fn=>{frames.set(++id,fn);return id;},caf:id=>frames.delete(id),later:(fn,ms)=>{timers.set(++id,{fn,at:time+ms});return id;},cancel:id=>timers.delete(id),tick(){time+=17;const work=[...frames.values()];frames.clear();work.forEach(fn=>fn(time));},advance(ms){time+=ms;for(const [id,t]of [...timers])if(t.at<=time){timers.delete(id);t.fn();}}};}
+function media(){const requests=[],draws=[];const context={drawImage(image){if(this.throwDraw)throw Error('Canvas failed');draws.push(Number(image.src.match(/frame-(\d+)/)[1]));}};const canvas={width:1376,height:768,dataset:{frames:template,count:String(count)},getContext:()=>context};return {canvas,context,draws,requests,imageFactory(){return {naturalWidth:1376,naturalHeight:768,_src:'',set src(s){this._src=s;if(s)requests.push(s);},get src(){return this._src;}};}};}
+function setup(options={}){const m=media(),timers=scheduler(),states=[];const film=new ScrollSequence(m.canvas,{template,count,onState:s=>states.push(s),scheduler:timers,imageFactory:m.imageFactory,...options});return {...m,timers,states,film};}
+function finish(h,index,okay=true){const job=h.film.pending.get(index);assert(job,'Expected pending frame '+index);const handler=okay?job.image.onload:job.image.onerror;handler();}
+function settle(h){let n=0;while(h.timers.frames.size||h.film.pending.size){assert(++n<100,'Animation did not settle');h.timers.tick();for(const [index]of [...h.film.pending])finish(h,index);assert(h.film.cache.size<=16);assert(h.film.pending.size<=4);}}
+assert.deepEqual(journey.benchmarkSummary(evidence),{runs:160,collisions:0,total:5,meets:2,fixedFaster:4});pass('Measured cards use the retained benchmark');
+assert.throws(()=>journey.benchmarkSummary({}));pass('Unavailable evidence cannot invent metrics');
+assert.equal(journey.journeyProgress(1350,[0,900,1800,2700]),1.5);pass('Chapter progress follows measured document positions');
+const h=setup();assert.equal(h.requests.length,0);assert.equal(h.draws.length,0);pass('Construction causes no image download');
+h.film.load();settle(h);assert.deepEqual(h.draws,[0]);assert(h.film.loaded);assert(h.requests[0].endsWith('frame-000.webp?v=1.8.0'));pass('First frame initializes canvas using the HTML asset configuration');
+assert.equal(h.timers.frames.size,0);assert.equal(h.film.pending.size,0);assert(h.requests.length<=6);pass('Neighbour prefetch stops when idle');
+h.film.setProgress(.5);settle(h);assert.equal(h.draws.at(-1),70);pass('Halfway scroll displays the actual middle frame');
+h.film.setProgress(1);settle(h);assert.equal(h.draws.at(-1),140);h.film.setProgress(99);settle(h);assert.equal(h.draws.at(-1),140);pass('End and overscroll stay inside the last frame');
+h.film.setProgress(-4);settle(h);assert.equal(h.draws.at(-1),0);pass('Backward scroll and negative overscroll return to opening');
+h.film.setProgress(.8);h.timers.tick();const old=[...h.film.pending.values()].map(job=>job.image.onload);h.film.setProgress(.1);h.timers.tick();old.forEach(fn=>fn());settle(h);assert.equal(h.draws.at(-1),14);pass('Late obsolete downloads cannot replace the latest requested frame');
+for(let i=0;i<100;i++)h.film.setProgress(i/100);assert(h.timers.frames.size<=1);settle(h);assert.equal(h.draws.at(-1),139);pass('Rapid scrolling coalesces into one scheduled update');
+h.film.setPaused(true);const frozen=h.draws.at(-1),requests=h.requests.length;h.film.setProgress(.2);h.timers.tick();assert.equal(h.requests.length,requests);assert.equal(h.draws.at(-1),frozen);pass('Pause freezes the scene and stops downloads');
+h.film.setPaused(false);settle(h);assert.equal(h.draws.at(-1),28);pass('Resume catches up to current scroll position');
+h.film.setVisible(false);h.film.setProgress(.7);h.timers.tick();assert.equal(h.film.pending.size,0);h.film.setVisible(true);settle(h);assert.equal(h.draws.at(-1),98);pass('Hidden tabs stop work and resume at the latest position');
+for(let i=0;i<count;i++){h.film.setProgress(i/(count-1));settle(h);}assert.equal(new Set(h.draws).size,141);assert(h.film.cache.size<=16);pass('All 141 frames are reachable with bounded decoded-image storage');
+const paused=setup({paused:true});paused.film.load();paused.film.setProgress(.6);paused.timers.tick();assert.equal(paused.requests.length,0);paused.film.setPaused(false);settle(paused);assert.equal(paused.draws.at(-1),84);pass('Reduced motion downloads nothing until explicitly enabled');
+const early=setup();early.film.load();early.timers.tick();const late=[...early.film.pending.values()].map(j=>j.image.onload);early.film.setPaused(true);late.forEach(fn=>fn());assert.equal(early.film.pending.size,0);assert.equal(early.draws.length,0);pass('Pause remains usable during initial loading');
+const broken=setup();broken.film.load();broken.timers.tick();finish(broken,0,false);assert(broken.film.failed);assert.equal(broken.film.pending.size,0);assert.equal(broken.states.at(-1).status,'error');pass('Missing initial image exposes retry without hanging');
+broken.film.retry();settle(broken);assert(broken.film.loaded&&!broken.film.failed);pass('Explicit retry recovers after an image failure');
+const timeout=setup();timeout.film.load();timeout.timers.tick();timeout.timers.advance(5001);assert(timeout.film.failed);assert.equal(timeout.timers.timers.size,0);pass('A stalled image request times out and cancels outstanding work');
+const neighbour=setup();neighbour.film.load();neighbour.timers.tick();finish(neighbour,1,false);settle(neighbour);assert(!neighbour.film.failed&&neighbour.film.loaded);pass('An unused neighbour failure does not hide the current frame');
+neighbour.film.setProgress(1/140);neighbour.timers.tick();assert(neighbour.film.failed);assert(neighbour.film.loaded);assert.equal(neighbour.draws.at(-1),0);pass('A failed requested frame retains the last visible scene');
+const noCanvas=setup();noCanvas.film.context=null;noCanvas.film.load();assert(noCanvas.film.failed);assert.equal(noCanvas.requests.length,0);pass('Unavailable canvas retains the static page');
+const drawError=setup();drawError.context.throwDraw=true;drawError.film.load();drawError.timers.tick();finish(drawError,0);assert(drawError.film.failed);pass('Canvas drawing errors are caught');
+const leaving=setup();leaving.film.load();leaving.timers.tick();const callbacks=[...leaving.film.pending.values()].map(j=>j.image.onload);leaving.film.dispose();callbacks.forEach(fn=>fn());assert.equal(leaving.film.pending.size,0);assert.equal(leaving.film.cache.size,0);assert.equal(leaving.timers.timers.size,0);assert.equal(leaving.draws.length,0);pass('Leaving cancels requests, timers and late callbacks');
+async function pageHarness({reduced=false,badEvidence=false}={}){
+ const m=media(),timers=scheduler(),events={},docEvents={},mediaEvents={};let win;
+ function element(id){const classes=new Set(),attributes={},listeners={};return {id,classes,attributes,listeners,textContent:'—',hidden:false,disabled:false,style:{},classList:{add:c=>classes.add(c),remove:c=>classes.delete(c),toggle:(c,on)=>on?classes.add(c):classes.delete(c)},setAttribute:(k,v)=>attributes[k]=v,getAttribute:k=>attributes[k],removeAttribute:k=>delete attributes[k],addEventListener:(n,f)=>listeners[n]=f,getBoundingClientRect:()=>({top:journey.CHAPTERS.indexOf(id)*900-win.scrollY})};}
+ const ids=['motion-toggle','scene-status','journey-progress','chapter-number','stat-runs','stat-collisions','stat-target','evidence-detail','evidence-grid',...journey.CHAPTERS];const nodes=new Map(ids.map(id=>[id,element(id)]));nodes.set('warehouse-film',m.canvas);const body=element('body');
+ const nav=journey.CHAPTERS.slice(1).map(id=>{const n=element(id+'-link');n.attributes.href='#'+id;return n;});
+ win={scrollY:0,addEventListener:(n,f)=>events[n]=f,matchMedia:()=>({matches:reduced,addEventListener:(n,f)=>mediaEvents[n]=f})};
+ const doc={body,hidden:false,getElementById:id=>{assert(nodes.has(id),'Missing DOM id '+id);return nodes.get(id);},querySelectorAll:()=>nav,addEventListener:(n,f)=>docEvents[n]=f};
+ const context=vm.createContext({document:doc,window:win,AbortController,setTimeout,clearTimeout,fetch:async()=>({ok:!badEvidence,json:async()=>evidence})});
+ const pure=new vm.SyntheticModule(Object.keys(journey),function(){for(const [k,v]of Object.entries(journey))this.setExport(k,v);},{context});
+ let player;class BoundSequence extends ScrollSequence{constructor(canvas,options){super(canvas,{...options,scheduler:timers,imageFactory:m.imageFactory});player=this;}}
+ const playerModule=new vm.SyntheticModule(['ScrollSequence'],function(){this.setExport('ScrollSequence',BoundSequence);},{context});
+ const main=new vm.SourceTextModule(readFileSync(new URL('../web/experience.js',import.meta.url),'utf8'),{context});await main.link(name=>name==='./journey.js'?pure:playerModule);await main.evaluate();await new Promise(setImmediate);
+ return {...m,nodes,body,win,doc,events,docEvents,mediaEvents,nav,timers,get film(){return player;}};
+}
+const page=await pageHarness();assert.equal(page.nodes.get('stat-runs').textContent,'160');assert.equal(page.nodes.get('stat-target').textContent,'2 / 5');settle(page);assert(page.body.classes.has('scene-ready'));pass('Actual page initializes scene and independent evidence cards');
+page.win.scrollY=900;page.events.scroll();settle(page);assert.equal(page.draws.at(-1),70);assert.equal(page.nodes.get('chapter-number').textContent,'02');assert.equal(page.nav[0].attributes['aria-current'],'step');pass('Challenge chapter advances the film halfway and updates navigation');
+page.win.scrollY=1800;page.events.scroll();settle(page);assert.equal(page.draws.at(-1),140);pass('Full camera move finishes before the evidence chapter');
+page.nodes.get('motion-toggle').listeners.click();assert.equal(page.nodes.get('motion-toggle').attributes['aria-pressed'],'false');assert.equal(page.nodes.get('motion-toggle').textContent,'Resume motion');page.nodes.get('motion-toggle').listeners.click();settle(page);pass('Visible motion control and accessibility state match playback');
+page.doc.hidden=true;page.docEvents.visibilitychange();assert(!page.film.visible);page.doc.hidden=false;page.docEvents.visibilitychange();settle(page);assert(page.film.visible);page.events.pagehide({persisted:true});assert(!page.film.visible&&!page.film.disposed);page.events.pageshow();settle(page);assert(page.film.visible);pass('Page visibility and back-forward restoration preserve the scene');
+const mobile=await pageHarness({reduced:true});assert.equal(mobile.requests.length,0);assert.equal(mobile.nodes.get('motion-toggle').textContent,'Enable motion');mobile.nodes.get('motion-toggle').listeners.click();settle(mobile);mobile.mediaEvents.change({matches:true});assert(mobile.film.paused);pass('Reduced-motion page starts static and respects preference changes');
+const pendingPage=await pageHarness();pendingPage.timers.tick();assert.equal(pendingPage.nodes.get('motion-toggle').disabled,false);pendingPage.nodes.get('motion-toggle').listeners.click();assert.equal(pendingPage.film.pending.size,0);pass('The page offers a working pause button while images load');
+const failedPage=await pageHarness();failedPage.timers.tick();finish(failedPage,0,false);assert.equal(failedPage.nodes.get('motion-toggle').textContent,'Retry motion');failedPage.nodes.get('motion-toggle').listeners.click();settle(failedPage);assert(failedPage.film.loaded);pass('Failure UI offers a working retry action');
+const missing=await pageHarness({reduced:true,badEvidence:true});assert.equal(missing.nodes.get('stat-runs').textContent,'—');assert(missing.nodes.get('evidence-detail').textContent.includes('could not be loaded'));pass('Evidence failure leaves honest empty values and console access');
+for(const hash of ['#sample','#evidence','#review','']){const calls=[];vm.runInNewContext(readFileSync(new URL('../web/entry.js',import.meta.url),'utf8'),{window:{location:{hash},addEventListener:(e,f)=>f()},openReplay:v=>calls.push(['sample',v]),setView:v=>calls.push(['view',v]),loadReview:v=>calls.push(['review',v])});assert.deepEqual(calls,hash==='#sample'?[['sample','sample']]:hash==='#evidence'?[['view','evidence']]:hash==='#review'?[['review','sample']]:[]);}pass('Console entry links remain read-only');
+for(const item of [h,paused,early,broken,timeout,neighbour,noCanvas,drawError,leaving,page,mobile,pendingPage,failedPage,missing])item.film.dispose();
+const result={passed:true,version:'1.8.0',harness:'Real sequence/page JS with deterministic canvas/image/DOM stubs; no browser rendering or responsive visual QA',checks};writeFileSync(new URL('../evidence/cinematic_checks.json',import.meta.url),JSON.stringify(result,null,2));console.log(JSON.stringify({passed:true,checks:checks.length,version:result.version}));

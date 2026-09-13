@@ -1,0 +1,43 @@
+test_conflicting_observations_are_flagged_without_mutation (test_insights.ReviewTests.test_conflicting_observations_are_flagged_without_mutation) ... ok
+test_empty_or_unsampled_run_does_not_claim_pass (test_insights.ReviewTests.test_empty_or_unsampled_run_does_not_claim_pass) ... ok
+test_known_record_matches_source_and_uses_submission_time (test_insights.ReviewTests.test_known_record_matches_source_and_uses_submission_time) ... ok
+test_all_maintenance_then_service_recovers_auction (test_product.ProductTests.test_all_maintenance_then_service_recovers_auction) ... ok
+test_authenticated_packets_reject_modification (test_product.ProductTests.test_authenticated_packets_reject_modification) ... ok
+test_command_retries_do_not_duplicate_jobs_or_replace_runs (test_product.ProductTests.test_command_retries_do_not_duplicate_jobs_or_replace_runs) ... ok
+test_configuration_rejects_invalid_numbers (test_product.ProductTests.test_configuration_rejects_invalid_numbers) ... ok
+test_duplicate_stale_and_wrong_epoch_grants (test_product.ProductTests.test_duplicate_stale_and_wrong_epoch_grants) ... ok
+test_dynamic_closure_causes_safe_replan (test_product.ProductTests.test_dynamic_closure_causes_safe_replan) ... ok
+test_failed_replacement_keeps_old_evidence_and_clears_live_identity (test_product.ProductTests.test_failed_replacement_keeps_old_evidence_and_clears_live_identity) ... ok
+test_history_survives_reopen (test_product.ProductTests.test_history_survives_reopen) ... ok
+test_invalid_predictor_is_rejected_without_losing_current_run (test_product.ProductTests.test_invalid_predictor_is_rejected_without_losing_current_run) ... ok
+test_killed_owner_keeps_resource_blocked (test_product.ProductTests.test_killed_owner_keeps_resource_blocked) ... ok
+test_live_job_after_completion (test_product.ProductTests.test_live_job_after_completion) ... ok
+test_loaded_reroute_retains_owner_and_delivers_once (test_product.ProductTests.test_loaded_reroute_retains_owner_and_delivers_once) ... ok
+test_network_partition_waits_then_recovers (test_product.ProductTests.test_network_partition_waits_then_recovers) ... ok
+test_paused_actions_are_present_in_saved_report (test_product.ProductTests.test_paused_actions_are_present_in_saved_report) ... ok
+test_picked_cargo_is_never_transferred (test_product.ProductTests.test_picked_cargo_is_never_transferred) ... ok
+test_process_runtime_uses_distinct_peers (test_product.ProductTests.test_process_runtime_uses_distinct_peers) ... ok
+test_published_snapshot_does_not_change_after_control_mutation (test_product.ProductTests.test_published_snapshot_does_not_change_after_control_mutation) ... ok
+test_repeated_jobs_across_map_and_fleet_sizes (test_product.ProductTests.test_repeated_jobs_across_map_and_fleet_sizes) ... ok
+test_report_escapes_labels_and_marks_incomplete_run (test_product.ProductTests.test_report_escapes_labels_and_marks_incomplete_run) ... ok
+test_scripted_disturbances_complete_without_duplicate_cargo (test_product.ProductTests.test_scripted_disturbances_complete_without_duplicate_cargo) ... ok
+test_swept_detector_finds_between_tick_collision (test_product.ProductTests.test_swept_detector_finds_between_tick_collision) ... ok
+test_terminal_run_rejects_new_mutations (test_product.ProductTests.test_terminal_run_rejects_new_mutations) ... ok
+test_unpicked_jobs_transfer_in_maintenance (test_product.ProductTests.test_unpicked_jobs_transfer_in_maintenance) ... ok
+test_all_local_assets_have_correct_mime_and_csp (test_web_routes.WebRouteTests.test_all_local_assets_have_correct_mime_and_csp) ... ok
+test_byte_ranges_match_exact_requested_bytes (test_web_routes.WebRouteTests.test_byte_ranges_match_exact_requested_bytes) ... ok
+test_complete_film_matches_file_and_head_is_bodyless (test_web_routes.WebRouteTests.test_complete_film_matches_file_and_head_is_bodyless) ... ok
+test_entry_and_console_are_separate_and_read_only (test_web_routes.WebRouteTests.test_entry_and_console_are_separate_and_read_only) ... ok
+test_frame_images_are_byte_exact_cacheable_and_head_safe (test_web_routes.WebRouteTests.test_frame_images_are_byte_exact_cacheable_and_head_safe) ... ok
+test_frame_route_is_bounded_and_cannot_escape_media (test_web_routes.WebRouteTests.test_frame_route_is_bounded_and_cannot_escape_media) ... ok
+test_frame_sequence_is_local_and_explicitly_illustrative (test_web_routes.WebRouteTests.test_frame_sequence_is_local_and_explicitly_illustrative) ... ok
+test_home_metrics_use_the_same_retained_evidence_as_console (test_web_routes.WebRouteTests.test_home_metrics_use_the_same_retained_evidence_as_console) ... ok
+test_media_cannot_bypass_local_host_or_static_allowlist (test_web_routes.WebRouteTests.test_media_cannot_bypass_local_host_or_static_allowlist) ... ok
+test_non_local_hosts_and_unlisted_paths_stay_restricted (test_web_routes.WebRouteTests.test_non_local_hosts_and_unlisted_paths_stay_restricted) ... ok
+test_unsatisfiable_ranges_return_416 (test_web_routes.WebRouteTests.test_unsatisfiable_ranges_return_416) ... ok
+test_unsupported_ranges_and_unvalidated_if_range_use_full_response (test_web_routes.WebRouteTests.test_unsupported_ranges_and_unvalidated_if_range_use_full_response) ... ok
+
+----------------------------------------------------------------------
+Ran 38 tests in 2.990s
+
+OK

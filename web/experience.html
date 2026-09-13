@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#06101b">
+  <meta name="description" content="Explore FleetMesh: local coordination for a simulated warehouse fleet. Explore the cinematic story, inspect the agents and examine recorded evidence.">
+  <title>FleetMesh — Local decisions. Shared progress.</title><link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="/experience.css">
+  <script type="module" src="/experience.js"></script>
+</head>
+<body>
+  <a class="skip" href="/app">Skip introduction and open console</a>
+  <header class="floating-nav">
+    <a class="wordmark" href="#arrival" aria-label="FleetMesh, beginning"><span class="brand-icon" aria-hidden="true"><i></i><i></i><i></i></span>FleetMesh</a>
+    <nav aria-label="Journey chapters"><a href="#challenge">The challenge</a><a href="#coordination">Coordination</a><a href="#evidence">Evidence</a></nav>
+    <a class="nav-cta" href="/app">Open console <span aria-hidden="true">↗</span></a>
+  </header>
+  <div class="stage" aria-hidden="true">
+    <img class="scene-poster" src="/media/warehouse-film-poster.webp" alt="" width="1376" height="768" fetchpriority="high">
+    <canvas id="warehouse-film" width="1376" height="768" data-count="141" data-frames="/media/warehouse-frames/frame-{index}.webp?v=__VERSION__"></canvas>
+    <div class="scene-shade"></div>
+    <div class="scene-vignette"></div>
+  </div>
+  <div class="scene-caption"><span class="tiny-dot"></span> AI-GENERATED VISUALS <span class="caption-divider">/</span> ILLUSTRATIVE</div>
+  <div class="experience-tools">
+    <button id="motion-toggle" type="button" aria-pressed="true" hidden>Pause motion</button>
+    <span id="scene-status" role="status">Static warehouse view</span>
+  </div>
+  <div class="journey-rail" aria-label="Journey progress"><span id="chapter-number">01</span><div><i id="journey-progress"></i></div><span>04</span></div>
+  <main>
+    <section class="chapter arrival" id="arrival" aria-labelledby="arrival-title">
+      <div class="chapter-copy">
+        <p class="kicker"><span></span> EDGE COORDINATION / SIH 26123</p>
+        <h1 id="arrival-title">Every robot.<br><em>A shared world.</em><br>Local decisions.</h1>
+        <p class="intro">Explore how warehouse robot processes coordinate when routes change.</p>
+        <div class="actions"><a class="cta primary" href="#challenge">Explore the warehouse <span aria-hidden="true">↓</span></a><a class="cta quiet" href="/app#sample">Watch recorded run <span aria-hidden="true">↗</span></a></div>
+        <div class="hero-tags"><span>3–6 robot processes</span><span>Runs locally</span><span>Evidence included</span></div>
+      </div>
+      <a class="scroll-prompt" href="#challenge"><span class="scroll-symbol" aria-hidden="true"></span> Scroll to move through the film</a>
+      
+    </section>
+    <section class="chapter challenge" id="challenge" aria-labelledby="challenge-title">
+      <div class="chapter-copy right-copy">
+        <p class="kicker amber">01 / THE CHALLENGE</p>
+        <h2 id="challenge-title">One crossing.<br><em>Three intentions.</em></h2>
+        <p class="intro">Shared space needs clear decisions. When robot routes overlap, who should proceed and who should wait?</p>
+        <div class="event-card"><span class="event-icon" aria-hidden="true">!</span><div><span class="event-label">THE COORDINATION CHALLENGE</span><strong>Who moves next?</strong><p>Request access. Wait for permission. Clear the shared space.</p></div></div>
+        <a class="inline-link" href="#coordination">Follow the local decision <span aria-hidden="true">↓</span></a>
+      </div>
+    </section>
+    <section class="chapter coordination" id="coordination" aria-labelledby="coordination-title">
+      <div class="chapter-layout">
+      <figure class="coordination-visual">
+        <img src="/media/warehouse-coordination.png" alt="Illustration of three loaded warehouse robots at a junction, with one behind a stop marking and an orange barrier closing a side aisle." width="1672" height="941" loading="lazy" decoding="async">
+        <figcaption><span>Coordination concept</span><span>Illustrative still</span></figcaption>
+      </figure>
+      <div class="chapter-copy">
+        <p class="kicker">02 / COORDINATION</p>
+        <h2 id="coordination-title">A blocked aisle.<br><em>A local decision.</em></h2>
+        <p class="intro">Follow the request, the wait and the revised route. Each robot process exchanges permissions directly with peers.</p>
+        <ol class="decision-list"><li><span>01</span><div><strong>Share intent</strong><p>Send the intended road zones to every peer.</p></div></li><li><span>02</span><div><strong>Agree access</strong><p>Wait until every required permission arrives.</p></div></li><li><span>03</span><div><strong>Move when clear</strong><p>Release owned zones after clearing them.</p></div></li></ol>
+        <a class="cta secondary" href="/app#sample">Inspect a recorded decision <span aria-hidden="true">↗</span></a>
+      </div>
+      </div>
+    </section>
+    <section class="chapter evidence" id="evidence" aria-labelledby="evidence-title">
+      <div class="evidence-content">
+        <p class="kicker">03 / THE EVIDENCE</p>
+        <h2 id="evidence-title">See the decisions.<br><em>Check the evidence.</em></h2>
+        <p class="intro">The film and concept image illustrate the setting. The console lets you examine what the software agents actually did.</p>
+        <div class="evidence-grid" id="evidence-grid" aria-busy="true">
+          <article><span>Retained benchmark runs</span><strong id="stat-runs">—</strong><p>Paired development experiments</p></article>
+          <article><span>Observed collision events</span><strong id="stat-collisions">—</strong><p>Within these finite simulations</p></article>
+          <article><span>Cohorts meeting 20%</span><strong id="stat-target">—</strong><p>Fixed rule vs stop-and-wait baseline</p></article>
+        </div>
+        <p class="evidence-detail" id="evidence-detail" role="status">Loading the saved benchmark evidence…</p>
+        <div class="actions"><a class="cta primary" href="/app">Open the working console <span aria-hidden="true">↗</span></a><a class="cta secondary" href="/app#evidence">Examine all four policies <span aria-hidden="true">→</span></a></div>
+        <div class="proof-note"><strong>Built to be questioned.</strong><p>Simulation today. Physical robots, real wireless tests and safety validation are the next engineering stage. The current 20% target is met in some benchmark cohorts; it is not a general performance claim.</p></div>
+        <footer><span>FleetMesh <b>v__VERSION__</b> / SIH 26123</span><a href="/guide" target="_blank" rel="noopener">Operating guide ↗</a><a href="#arrival">Back to the entrance ↑</a></footer>
+      </div>
+    </section>
+  </main>
+  <noscript><div class="noscript">JavaScript is off. You can read the story here. Enable JavaScript to use the local operations console.</div></noscript>
+</body>
+</html>

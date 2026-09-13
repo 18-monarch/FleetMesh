@@ -1,0 +1,19 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FleetMesh run report</title><style>body{font:16px/1.6 system-ui,sans-serif;color:#17352b;max-width:1050px;margin:45px auto;padding:0 24px}h1{font-size:34px}h2{margin-top:32px}table{border-collapse:collapse;width:100%;font-size:13px}th,td{border-bottom:1px solid #ccd5ce;padding:9px;text-align:left}pre{white-space:pre-wrap;background:#f3f6f1;padding:16px}.scroll{overflow:auto}@media print{body{margin:0}h2{break-after:avoid}tr{break-inside:avoid}}</style></head><body>
+<h1>FleetMesh run report</h1><p><strong>All missions returned to dock.</strong> 7/7 missions completed in 198.4 simulated seconds, including return to dock.</p>
+<p>Detected inter-robot collisions: <strong>0</strong>. Minimum observed separation: 2.0 m. Route recoveries: 2. Ownership transfers: 1.</p>
+<h2>Run configuration</h2><pre>{
+  &quot;id&quot;: &quot;4cdc71bb168041c1ad7f33aeea8492cf&quot;,
+  &quot;started&quot;: &quot;2026-09-12T16:10:52.547612+00:00&quot;,
+  &quot;status&quot;: &quot;completed&quot;,
+  &quot;map&quot;: &quot;warehouse&quot;,
+  &quot;mode&quot;: &quot;heuristic&quot;,
+  &quot;seed&quot;: 200,
+  &quot;robots&quot;: 3,
+  &quot;scenario&quot;: &quot;normal&quot;
+}</pre>
+<h2>Demonstration actions</h2><p>Scripted disturbances in a local simulation. Outcomes are observed, not pre-recorded.</p><ol><li>5.0 s: Urgent mission J007 submitted to the peer auction</li><li>12.0 s: N00:N01 closed after confirming the segment is clear</li><li>20.0 s: Peer messages interrupted</li><li>28.0 s: Peer messages restored</li><li>45.0 s: N00:N01 reopened</li></ol>
+<p>Scheduled disturbances complete: True. Urgent mission: J007, state: done.</p>
+<h2>Mission ledger</h2><p>Owner uses zero-based robot IDs (0 means Robot 1).</p><div class="scroll"><table><thead><tr><th>Job</th><th>Owner</th><th>State</th><th>Pickup</th><th>Delivery</th><th>Priority</th><th>Delivered at</th><th>Docked at</th></tr></thead><tbody><tr><td>J001</td><td>0</td><td>done</td><td>N00</td><td>N11</td><td>1</td><td>149.9</td><td>158.2</td></tr><tr><td>J002</td><td>1</td><td>done</td><td>N32</td><td>N00</td><td>1</td><td>93.8</td><td>110.0</td></tr><tr><td>J003</td><td>1</td><td>done</td><td>N02</td><td>N31</td><td>1</td><td>149.3</td><td>165.5</td></tr><tr><td>J004</td><td>0</td><td>done</td><td>N11</td><td>N00</td><td>1</td><td>173.5</td><td>175.2</td></tr><tr><td>J005</td><td>1</td><td>done</td><td>N32</td><td>N21</td><td>1</td><td>185.7</td><td>198.3</td></tr><tr><td>J006</td><td>2</td><td>done</td><td>N32</td><td>N02</td><td>1</td><td>20.3</td><td>61.2</td></tr><tr><td>J007</td><td>0</td><td>done</td><td>N00</td><td>N32</td><td>3</td><td>123.0</td><td>141.2</td></tr></tbody></table></div>
+<h2>Interpretation</h2><p>This report describes one persisted simulation snapshot. It does not establish a speed improvement against a baseline, physical robot safety, or reliable operation on real Wi-Fi. A zero collision count is a finite observation. Waiting during interruption and progress after restoration must be checked in the replay. A stopped peer can halt new grants indefinitely.</p>
+<p>The supervisor supplies simulated physics and injects disturbances. Independent robot processes decide routes and exchange permissions over local UDP. Physical edge hardware, noisy localization and braking remain unvalidated. Battery estimates are illustrative.</p></body></html>
