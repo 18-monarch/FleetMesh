@@ -6,8 +6,8 @@ export class ScrollSequence {
   constructor(canvas,{template,count,paused=false,onState=()=>{},imageFactory=()=>new Image(),scheduler={}}){
     this.canvas=canvas;this.context=canvas.getContext('2d',{alpha:false});
     this.template=template;this.count=count;this.paused=paused;this.onState=onState;this.imageFactory=imageFactory;
-    this.raf=scheduler.raf||requestAnimationFrame;this.caf=scheduler.caf||cancelAnimationFrame;
-    this.later=scheduler.later||setTimeout;this.cancel=scheduler.cancel||clearTimeout;
+    this.raf=scheduler.raf||(callback=>window.requestAnimationFrame(callback));this.caf=scheduler.caf||(id=>window.cancelAnimationFrame(id));
+    this.later=scheduler.later||((callback,ms)=>window.setTimeout(callback,ms));this.cancel=scheduler.cancel||(id=>window.clearTimeout(id));
     this.cache=new Map();this.pending=new Map();this.errors=new Set();
     this.progress=0;this.target=0;this.drawn=-1;this.direction=1;this.frame=0;
     this.visible=true;this.enabled=false;this.failed=false;this.disposed=false;

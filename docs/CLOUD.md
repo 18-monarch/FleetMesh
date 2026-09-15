@@ -7,6 +7,9 @@ The robot subprocesses communicate by authenticated UDP inside that service.
 
 ## Deploy
 
+Current resources and measured checks are listed in [CLOUD_VALIDATION.md](CLOUD_VALIDATION.md).
+Reuse those existing projects. The steps below also explain a manual setup.
+
 1. Deploy this branch to Render using `render.yaml`, or a Python web service with
    build `pip install -r requirements-cloud.txt` and start
    `python migrate.py && python cloud.py`. Choose Singapore and the free plan.
@@ -53,6 +56,8 @@ checks, visitor isolation, retry receipts, resource caps, and restart persistenc
 - Keep at most the latest 80 runs across the demo, up to seven days. Each run keeps
   up to 900 recent sampled frames, compressed. High-speed replay is sampled,
   not every physics tick; exact final state and retained events are also saved.
+- Saved control receipts are capped at 10,000 globally and expire after seven days.
+  Once full, new control commands stop with an explicit capacity message.
 - A coalescing writer keeps SQL latency outside robot tick decisions. On a database
   outage, latest snapshots queue in memory and the console warns that history is
   temporarily unsaved. If the process crashes before reconnecting, those unsaved

@@ -141,6 +141,8 @@ class Manager:
 
     def get(self, owner):
         with self.lock:
+            if self.stop.is_set():
+                raise CapacityError('The backend is restarting. Please retry shortly.')
             if owner not in self.sessions:
                 if len(self.sessions) >= 24:
                     raise CapacityError('The demo is busy. Please retry in two minutes.')
@@ -157,6 +159,8 @@ class Manager:
         session = self.get(owner)
         # SQL and flush barriers do not hold the simulation's tick lock.
         with session.command_lock:
+            if self.stop.is_set():
+                raise CapacityError('The backend is restarting. Please retry shortly.')
             signature = json.dumps([action, options], sort_keys=True, separators=(',', ':'), allow_nan=False)
             previous = self.db.begin_command(owner, request_id, signature)
             if previous is not None:
@@ -214,7 +218,8 @@ class Manager:
         self.cleaner.join(6)
         for session in list(self.sessions.values()):
             try:
-                session.close()
+                with session.command_lock:
+                    session.close()
             except StorageUnavailable:
                 pass
         self.db.close()

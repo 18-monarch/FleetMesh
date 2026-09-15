@@ -1,6 +1,6 @@
 {
   "passed": true,
-  "version": "1.8.0",
+  "version": "1.9.0",
   "harness": "Real sequence/page JS with deterministic canvas/image/DOM stubs; no browser rendering or responsive visual QA",
   "checks": [
     "Measured cards use the retained benchmark",
@@ -37,6 +37,7 @@
     "The page offers a working pause button while images load",
     "Failure UI offers a working retry action",
     "Evidence failure leaves honest empty values and console access",
-    "Console entry links remain read-only"
+    "Console entry links remain read-only",
+    "Default browser scheduler keeps the Window receiver through load and cleanup"
   ]
 }
