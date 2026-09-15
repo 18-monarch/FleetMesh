@@ -5,7 +5,7 @@
 - Working Render service: https://fleetmesh-api.onrender.com (bundled cinematic page)
   and https://fleetmesh-api.onrender.com/app (console). This is also the Python API.
 - Requested frontend host: Vercel. Production deployment was submitted as
-  `dpl_FEqSLm4bWZjFuyi41RqkJVWj1hyF`. Its returned URLs require Vercel authentication.
+  `dpl_9YNNDsmjtoZKE8Ko2L33AtibuoSR`. Its returned URLs require Vercel authentication.
   The connected account's project inspection also returns 403, so build status,
   canonical public production domain, and browser-to-API proxy flow remain unverified.
   Reconnect Vercel with access to team `mohitchaudhari018-4820s-projects`, then inspect
@@ -16,7 +16,7 @@
   first checked on isolated branch `br-dark-meadow-b3vir9fg`.
 - Render uses its default TCP health check. `render.yaml` specifies `/api/health`;
   the connected tools cannot change the existing service's health-check path.
-  Set that path in Render's existing service settings for HTTP readiness checks.
+  Set that path in Render's existing service settings for HTTP health checks.
 
 ## Completed checks
 
@@ -39,9 +39,17 @@ Production Render/Neon checks completed:
   duplicate start receipt, three distinct worker PIDs, matching saved metrics,
   and JSON/replay, CSV and HTML report retrieval.
 - Neon independently confirms persisted completed runs and sampled frames.
+- After deployment, the original visitor cookie still retrieved completed results,
+  interrupted replay frames and duplicate-command receipts. A second explicit
+  restart kept the test visitor active with polling: it observed its live session
+  disappear and retrieved the saved interrupted replay. Robot processes did not resume.
+  Confirmed Render restart deployment: `dep-dakmvqgu01pc73fn945g`.
 - Application console had no application-origin errors in the verified console
   flow. Browser-extension errors are separate. The cinematic browser check found
-  an illegal scheduler invocation; this release fixes it and adds a regression.
+  an illegal scheduler invocation. After deployment of the fix, real browser
+  checks observed frame 0 advancing to frame 133, chapter 01 changing to 03,
+  and the motion control changing to Resume motion / Motion paused. No application
+  errors appeared in the fresh cinematic tab.
 
 Automated requests from the development environment sometimes timed out opening
 its outbound proxy tunnel. The smoke script uses bounded retries and stable command
@@ -96,3 +104,14 @@ The state file contains the testing visitor's cookie. Keep it private and delete
 after testing. `--prepare-restart` can prepare a fresh paused run from an existing
 state file without repeating the benchmark. See [CLOUD.md](CLOUD.md) for architecture,
 deployment configuration and the three-minute judge script.
+
+## Current presentation
+
+[Updated six-slide cloud pitch](FleetMesh_SIH26123_Cloud_Pitch.pptx) includes the actual
+hosted console screenshot and corrected cloud/validation claims. The native historical
+chart and its original workbook are preserved. Enter the registered team name and ID
+before submission. Older pitch/PDF files remain historical material.
+
+![Hosted result](screenshots/cloud-result.jpg)
+
+![Cinematic chapter](screenshots/cloud-cinema.jpg)

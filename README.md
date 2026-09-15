@@ -1,10 +1,15 @@
 # FleetMesh 1.9
 
-Cloud integration adds a static Vercel frontend, bounded visitor sessions on a Render
-Python backend, and scoped Neon PostgreSQL history. The local SQLite launcher remains
+Cloud integration prepares a static Vercel frontend and adds bounded visitor sessions
+on a Render Python backend with scoped Neon PostgreSQL history. Render/Neon are live;
+public Vercel access is still awaiting account access. The local SQLite launcher remains
 available. See [cloud deployment and judge demo](docs/CLOUD.md) for setup, architecture,
 resource limits, persistence behavior, and verification. The sections below document
 the original local v1.8 release and its historical benchmark evidence.
+
+[Open the working hosted app](https://fleetmesh-api.onrender.com/) ·
+[Verification and remaining steps](docs/CLOUD_VALIDATION.md) ·
+[Updated SIH cloud pitch](docs/FleetMesh_SIH26123_Cloud_Pitch.pptx)
 
 **A complete local simulation application for warehouse robot coordination.** This release has a runnable backend, independent robot processes, an operations dashboard, live task submission, controlled task handoff, map disturbances, robot inspection, presentation mode, playable history, run review and exports.
 

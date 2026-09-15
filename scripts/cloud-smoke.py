@@ -57,7 +57,8 @@ class Visitor:
 
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('url');parser.add_argument('--state-file',required=True)
-    parser.add_argument('--verify-restart',action='store_true');parser.add_argument('--prepare-restart',action='store_true');args=parser.parse_args()
+    parser.add_argument('--verify-restart',action='store_true');parser.add_argument('--prepare-restart',action='store_true')
+    parser.add_argument('--wait-for-restart',action='store_true');args=parser.parse_args()
     path=Path(args.state_file)
     if args.prepare_restart:
         saved=json.loads(path.read_text());visitor=Visitor(args.url,saved['cookie'])
@@ -66,7 +67,18 @@ def main():
         visitor.request('/api/pause',{})
         assert visitor.request('/api/runs/'+rid+'?frames=1')['frames']
         saved.update(paused_id=rid,start_request=request_id)
-        path.write_text(json.dumps(saved));print('Paused run saved; ready for backend restart.');return
+        path.write_text(json.dumps(saved));print('Paused run saved; ready for backend restart.',flush=True)
+        if args.wait_for_restart:
+            deadline=time.monotonic()+240
+            while time.monotonic()<deadline:
+                state=visitor.request('/api/state')
+                if state['run_id'] is None:
+                    record=visitor.request('/api/runs/'+rid+'?frames=1')
+                    assert record['status']=='interrupted' and record['frames']
+                    print('Active visitor observed backend restart and retained interrupted replay.',flush=True);return
+                time.sleep(3)
+            raise AssertionError('No backend restart observed within four minutes')
+        return
     if args.verify_restart:
         saved=json.loads(path.read_text());visitor=Visitor(args.url,saved['cookie'])
         run=visitor.request('/api/runs/'+saved['paused_id']+'?frames=1')
