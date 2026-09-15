@@ -44,8 +44,8 @@ class InstanceLock:
     def close(self):self.file.close()
 
 class Session:
-    def __init__(self,directory):
-        self.lock=threading.RLock();self.store=RunStore(directory);self.runtime=None
+    def __init__(self,directory,store=None):
+        self.lock=threading.RLock();self.store=store if store is not None else RunStore(directory);self.runtime=None
         self.run_id=None;self.playing=False;self.rate=8.;self.quit=False;self.status='ready';self.error=None;self.last_save=-1
         self.token=secrets.token_urlsafe(32)
         self.demonstration=None
@@ -285,7 +285,7 @@ def make_handler(session):
                     if len(parts)>4 or (len(parts)==4 and parts[3] not in ('csv','report','insights')):raise KeyError('Run not found')
                     with session.lock:
                         if rid==session.run_id:session.persist()
-                        record=session.store.get(rid,frames=parse_qs(parsed.query).get('frames')==['1'] or path.endswith('/insights'))
+                    record=session.store.get(rid,frames=parse_qs(parsed.query).get('frames')==['1'] or path.endswith('/insights'))
                     if len(parts)==4 and parts[3]=='insights':return self.respond(summarize_run(record))
                     if len(parts)==4 and parts[3]=='report':
                         return self.respond(run_report(record),'text/html; charset=utf-8',filename='fleetmesh-report-'+rid[:8]+'.html')

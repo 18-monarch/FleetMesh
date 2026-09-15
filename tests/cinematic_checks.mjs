@@ -5,10 +5,11 @@ import {readFileSync,writeFileSync} from 'node:fs';
 import * as journey from '../web/journey.js';
 import {ScrollSequence} from '../web/sequence-player.js';
 const checks=[],pass=name=>checks.push(name);
+const version=readFileSync(new URL('../version.py',import.meta.url),'utf8').match(/['"]([^'"]+)['"]/)[1];
 const evidence=JSON.parse(readFileSync(new URL('../evidence/summary.json',import.meta.url)));
 const html=readFileSync(new URL('../web/experience.html',import.meta.url),'utf8');
 const count=Number(html.match(/data-count="(\d+)"/)[1]);assert.equal(count,141);
-const template=html.match(/data-frames="([^"]+)"/)[1].replace('__VERSION__','1.8.0');
+const template=html.match(/data-frames="([^"]+)"/)[1].replace('__VERSION__',version);
 function scheduler(){let id=0,time=0;const frames=new Map(),timers=new Map();return {frames,timers,raf:fn=>{frames.set(++id,fn);return id;},caf:id=>frames.delete(id),later:(fn,ms)=>{timers.set(++id,{fn,at:time+ms});return id;},cancel:id=>timers.delete(id),tick(){time+=17;const work=[...frames.values()];frames.clear();work.forEach(fn=>fn(time));},advance(ms){time+=ms;for(const [id,t]of [...timers])if(t.at<=time){timers.delete(id);t.fn();}}};}
 function media(){const requests=[],draws=[];const context={drawImage(image){if(this.throwDraw)throw Error('Canvas failed');draws.push(Number(image.src.match(/frame-(\d+)/)[1]));}};const canvas={width:1376,height:768,dataset:{frames:template,count:String(count)},getContext:()=>context};return {canvas,context,draws,requests,imageFactory(){return {naturalWidth:1376,naturalHeight:768,_src:'',set src(s){this._src=s;if(s)requests.push(s);},get src(){return this._src;}};}};}
 function setup(options={}){const m=media(),timers=scheduler(),states=[];const film=new ScrollSequence(m.canvas,{template,count,onState:s=>states.push(s),scheduler:timers,imageFactory:m.imageFactory,...options});return {...m,timers,states,film};}
@@ -18,7 +19,7 @@ assert.deepEqual(journey.benchmarkSummary(evidence),{runs:160,collisions:0,total
 assert.throws(()=>journey.benchmarkSummary({}));pass('Unavailable evidence cannot invent metrics');
 assert.equal(journey.journeyProgress(1350,[0,900,1800,2700]),1.5);pass('Chapter progress follows measured document positions');
 const h=setup();assert.equal(h.requests.length,0);assert.equal(h.draws.length,0);pass('Construction causes no image download');
-h.film.load();settle(h);assert.deepEqual(h.draws,[0]);assert(h.film.loaded);assert(h.requests[0].endsWith('frame-000.webp?v=1.8.0'));pass('First frame initializes canvas using the HTML asset configuration');
+h.film.load();settle(h);assert.deepEqual(h.draws,[0]);assert(h.film.loaded);assert(h.requests[0].endsWith('frame-000.webp?v='+version));pass('First frame initializes canvas using the HTML asset configuration');
 assert.equal(h.timers.frames.size,0);assert.equal(h.film.pending.size,0);assert(h.requests.length<=6);pass('Neighbour prefetch stops when idle');
 h.film.setProgress(.5);settle(h);assert.equal(h.draws.at(-1),70);pass('Halfway scroll displays the actual middle frame');
 h.film.setProgress(1);settle(h);assert.equal(h.draws.at(-1),140);h.film.setProgress(99);settle(h);assert.equal(h.draws.at(-1),140);pass('End and overscroll stay inside the last frame');
@@ -63,5 +64,21 @@ const pendingPage=await pageHarness();pendingPage.timers.tick();assert.equal(pen
 const failedPage=await pageHarness();failedPage.timers.tick();finish(failedPage,0,false);assert.equal(failedPage.nodes.get('motion-toggle').textContent,'Retry motion');failedPage.nodes.get('motion-toggle').listeners.click();settle(failedPage);assert(failedPage.film.loaded);pass('Failure UI offers a working retry action');
 const missing=await pageHarness({reduced:true,badEvidence:true});assert.equal(missing.nodes.get('stat-runs').textContent,'—');assert(missing.nodes.get('evidence-detail').textContent.includes('could not be loaded'));pass('Evidence failure leaves honest empty values and console access');
 for(const hash of ['#sample','#evidence','#review','']){const calls=[];vm.runInNewContext(readFileSync(new URL('../web/entry.js',import.meta.url),'utf8'),{window:{location:{hash},addEventListener:(e,f)=>f()},openReplay:v=>calls.push(['sample',v]),setView:v=>calls.push(['view',v]),loadReview:v=>calls.push(['review',v])});assert.deepEqual(calls,hash==='#sample'?[['sample','sample']]:hash==='#evidence'?[['view','evidence']]:hash==='#review'?[['review','sample']]:[]);}pass('Console entry links remain read-only');
+// Browser scheduler APIs require a Window receiver. Injected schedulers above
+// cannot catch an illegal invocation in the production/default code path.
+{
+ const timers=scheduler(),m=media(),host={};
+ for(const [name,method] of [['requestAnimationFrame','raf'],['cancelAnimationFrame','caf'],['setTimeout','later'],['clearTimeout','cancel']]){
+  host[name]=function(...args){assert.equal(this,host,'Browser scheduler lost its Window receiver');return timers[method](...args);};
+ }
+ const context=vm.createContext({window:host,...host});
+ const pure=new vm.SyntheticModule(['clamp'],function(){this.setExport('clamp',journey.clamp);},{context});
+ const source=new vm.SourceTextModule(readFileSync(new URL('../web/sequence-player.js',import.meta.url),'utf8'),{context});
+ await source.link(()=>pure);await source.evaluate();
+ const player=new source.namespace.ScrollSequence(m.canvas,{template,count,imageFactory:m.imageFactory});
+ player.load();timers.tick();assert(player.pending.size>0);player.setPaused(true);player.dispose();
+ assert.equal(timers.frames.size,0);assert.equal(timers.timers.size,0);
+ pass('Default browser scheduler keeps the Window receiver through load and cleanup');
+}
 for(const item of [h,paused,early,broken,timeout,neighbour,noCanvas,drawError,leaving,page,mobile,pendingPage,failedPage,missing])item.film.dispose();
-const result={passed:true,version:'1.8.0',harness:'Real sequence/page JS with deterministic canvas/image/DOM stubs; no browser rendering or responsive visual QA',checks};writeFileSync(new URL('../evidence/cinematic_checks.json',import.meta.url),JSON.stringify(result,null,2));console.log(JSON.stringify({passed:true,checks:checks.length,version:result.version}));
+const result={passed:true,version,harness:'Real sequence/page JS with deterministic canvas/image/DOM stubs; no browser rendering or responsive visual QA',checks};writeFileSync(new URL('../evidence/cinematic_checks.json',import.meta.url),JSON.stringify(result,null,2));console.log(JSON.stringify({passed:true,checks:checks.length,version:result.version}));

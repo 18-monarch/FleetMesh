@@ -10,8 +10,8 @@ export function filmTime(progress,duration){
 export class ScrollFilm {
   constructor(video,{src,onState=()=>{},paused=false,scheduler={}}){
     this.video=video;this.src=src;this.onState=onState;
-    this.raf=scheduler.raf||requestAnimationFrame;this.caf=scheduler.caf||cancelAnimationFrame;
-    this.later=scheduler.later||setTimeout;this.cancel=scheduler.cancel||clearTimeout;
+    this.raf=scheduler.raf||(callback=>window.requestAnimationFrame(callback));this.caf=scheduler.caf||(id=>window.cancelAnimationFrame(id));
+    this.later=scheduler.later||((callback,ms)=>window.setTimeout(callback,ms));this.cancel=scheduler.cancel||(id=>window.clearTimeout(id));
     this.paused=paused;this.visible=true;this.progress=0;this.loaded=false;this.loading=false;
     this.failed=false;this.disposed=false;this.inFlight=false;this.frame=0;this.loadTimer=0;this.seekTimer=0;this.lastSeek=-Infinity;this.duration=0;
     this.listeners={

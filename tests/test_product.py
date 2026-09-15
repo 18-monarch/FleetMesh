@@ -176,6 +176,30 @@ class ProductTests(unittest.TestCase):
         self.assertGreater(result['reroutes'],0)
         self.assertEqual(len([e for e in sim.world.events if e['kind']=='delivery']),6)
 
+    def test_occupied_aisle_closes_only_after_clear_and_can_be_cancelled(self):
+        sim=Simulation(make_config(200,job_count=6),MODEL)
+        chosen=None
+        for _ in range(500):
+            sim.step()
+            chosen=next((edge_key(a,b) for a,b in sim.world.layout['edges']
+                         if a.startswith('N') and b.startswith('N') and sim.world.edge_occupied(edge_key(a,b))),None)
+            if chosen:break
+        self.assertIsNotNone(chosen)
+        sim.world.set_edge(chosen,True)
+        self.assertIn(chosen,sim.world.pending_closures)
+        self.assertFalse(sim.world.map_changes.get(chosen,{}).get('blocked',False))
+        sim.world.set_edge(chosen,False)
+        self.assertNotIn(chosen,sim.world.pending_closures)
+        sim.world.set_edge(chosen,True)
+        for _ in range(500):
+            sim.step();self.assert_exclusive(sim)
+            if sim.world.map_changes[chosen]['blocked']:break
+        self.assertTrue(sim.world.map_changes[chosen]['blocked'])
+        self.assertFalse(sim.world.edge_occupied(chosen))
+        sim.world.set_edge(chosen,False)
+        self.assertTrue(sim.run(650)['completed'])
+        self.assertEqual(sim.world.collisions,0)
+
     def test_loaded_reroute_retains_owner_and_delivers_once(self):
         sim=Simulation(make_config(208,job_count=3),MODEL)
         chosen=None
