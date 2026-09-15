@@ -9,6 +9,7 @@ from http.client import HTTPConnection
 from http.server import ThreadingHTTPServer
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from server import Session,make_handler
+from version import VERSION
 
 class WebRouteTests(unittest.TestCase):
     @classmethod
@@ -57,7 +58,7 @@ class WebRouteTests(unittest.TestCase):
 
     def test_frame_sequence_is_local_and_explicitly_illustrative(self):
         status,headers,home=self.get('/')
-        self.assertIn(b'AI-GENERATED VISUALS',home);self.assertIn(b'data-frames="/media/warehouse-frames/frame-{index}.webp?v=1.8.0"',home)
+        self.assertIn(b'AI-GENERATED VISUALS',home);self.assertIn(('data-frames="/media/warehouse-frames/frame-{index}.webp?v='+VERSION+'"').encode(),home)
         self.assertIn(b'data-count="141"',home);self.assertIn(b'<canvas',home);self.assertNotIn(b'<video',home)
         self.assertIn(b'Coordination concept',home);self.assertIn(b'Illustrative still',home);self.assertNotIn(b'concept-label',home)
         self.assertIn("media-src 'self'",headers['Content-Security-Policy'])

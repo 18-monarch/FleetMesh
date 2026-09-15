@@ -287,7 +287,10 @@ class Agent:
                 'route': self.route[self.route_index:], 'reason': self.reason,
                 'wait_seconds': round(self.wait_seconds, 2), 'distance': round(self.distance, 2),
                 'battery': round(max(0., 100-self.distance*.025), 1), 'model_calls': self.model_calls,
-                'transfers': self.transfers, 'reroutes': self.reroutes, 'alive': True}
+                'transfers': self.transfers, 'reroutes': self.reroutes, 'alive': True,
+                'peer_observations': [{'id': rid, 'position': info.get('position'), 'intent': info.get('intent', []),
+                                       'age_seconds': round(max(0., self.t-info['time']), 2),
+                                       'stale': self.t-info['time'] > 2} for rid, info in sorted(self.peer.items())]}
 
     def step(self, obs):
         self.t = obs['time']; self.pos = tuple(obs['position']); self.out = []
@@ -373,7 +376,9 @@ class Agent:
         self.distance += math.hypot(*velocity)*DT
         if self.t - self.last_emit >= .4:
             self.send('INFO', {'time': self.t, 'held': sorted(self.held), 'request': self.request['zone'] if self.request else None,
-                               'remaining': self.remaining_seconds(), 'available': self.available, 'pending_zones': self.request['zones'] if self.request else []})
+                               'remaining': self.remaining_seconds(), 'available': self.available, 'pending_zones': self.request['zones'] if self.request else [],
+                               'position': list(self.pos), 'intent': self.route[self.route_index:self.route_index+4],
+                               'stage': self.stage, 'job': self.active})
             for job in self.jobs.values():
                 if job['owner'] == self.id:
                     self.send('JOB', dict(job))

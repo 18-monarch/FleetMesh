@@ -1,0 +1,1 @@
+{"name":"fleetmesh","version":"1.9.0","private":true,"scripts":{"build":"node scripts/build-frontend.mjs","check":"node --check web/app.js && node --check web/experience.js"}}

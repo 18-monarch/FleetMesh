@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: fleetmesh-api
+    runtime: python
+    plan: free
+    region: singapore
+    branch: feat/cloud-deployment
+    buildCommand: pip install -r requirements-cloud.txt
+    startCommand: python migrate.py && python cloud.py
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.10
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_URL_UNPOOLED
+        sync: false
+      - key: ALLOWED_ORIGINS
+        sync: false
+      - key: MAX_ACTIVE_RUNS
+        value: '2'

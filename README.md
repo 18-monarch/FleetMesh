@@ -1,4 +1,10 @@
-# FleetMesh 1.8
+# FleetMesh 1.9
+
+Cloud integration adds a static Vercel frontend, bounded visitor sessions on a Render
+Python backend, and scoped Neon PostgreSQL history. The local SQLite launcher remains
+available. See [cloud deployment and judge demo](docs/CLOUD.md) for setup, architecture,
+resource limits, persistence behavior, and verification. The sections below document
+the original local v1.8 release and its historical benchmark evidence.
 
 **A complete local simulation application for warehouse robot coordination.** This release has a runnable backend, independent robot processes, an operations dashboard, live task submission, controlled task handoff, map disturbances, robot inspection, presentation mode, playable history, run review and exports.
 
