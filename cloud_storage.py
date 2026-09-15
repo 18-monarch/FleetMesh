@@ -117,6 +117,9 @@ class CloudDatabase:
 
     def begin_command(self, owner, request_id, signature):
         with self.transaction() as conn:
+            existing = self.sql(conn, 'SELECT signature,result FROM fm_commands WHERE owner=? AND request_id=?', (owner, request_id)).fetchone()
+            if not existing and self.sql(conn, 'SELECT COUNT(*) FROM fm_commands').fetchone()[0] >= 10000:
+                raise ValueError('The free demo has reached its saved-command capacity. Existing history is still available.')
             cur = self.sql(conn, 'INSERT INTO fm_commands VALUES (?,?,?,?,?) ON CONFLICT(owner,request_id) DO NOTHING',
                            (owner, request_id, signature, None, time.time()))
             if cur.rowcount:
@@ -146,6 +149,8 @@ class ScopedStore:
         self.closed = False
         self.error = None
         self.last_frame = 0.
+        self.revision = 0
+        self.saved_revision = 0
         self.thread = threading.Thread(target=self._write, daemon=True)
         self.thread.start()
 
@@ -162,7 +167,8 @@ class ScopedStore:
                 self.last_frame = now
             if rid in self.pending:
                 take_frame |= self.pending[rid][2]
-            self.pending[rid] = (snapshot, status, take_frame)
+            self.revision += 1
+            self.pending[rid] = (snapshot, status, take_frame, self.revision)
             self.condition.notify_all()
 
     def _write(self):
@@ -175,11 +181,17 @@ class ScopedStore:
                 if not self.closed:
                     self.condition.wait_for(lambda: self.closed, timeout=.75)
                 pending, self.pending = self.pending, {}
+                if not pending:
+                    continue
                 self.writing = True
             try:
-                for rid, (snapshot, status, frame) in pending.items():
+                for rid, (snapshot, status, frame, revision) in pending.items():
                     self.db.save(self.owner, rid, snapshot, status, frame)
+                self.saved_revision = max(self.saved_revision, *(item[3] for item in pending.values()))
                 self.error = None
+            except KeyError:
+                self.error = 'This saved run has expired under the public demo retention limit.'
+                self.saved_revision = max(self.saved_revision, *(item[3] for item in pending.values()))
             except StorageUnavailable:
                 self.error = 'History is temporarily unsaved. Simulation continues; reconnect to save the latest state.'
                 with self.condition:
@@ -194,7 +206,8 @@ class ScopedStore:
 
     def flush(self, timeout=10):
         with self.condition:
-            if not self.condition.wait_for(lambda: not self.pending and not self.writing, timeout):
+            target = self.revision
+            if not self.condition.wait_for(lambda: self.saved_revision >= target, timeout):
                 raise StorageUnavailable('History save is pending. Retry after the database reconnects.')
 
     def list(self):
@@ -207,7 +220,7 @@ class ScopedStore:
 
     def close(self):
         try:
-            self.flush()
+            self.flush(timeout=4)
         finally:
             with self.condition:
                 self.closed = True

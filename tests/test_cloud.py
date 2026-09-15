@@ -141,5 +141,27 @@ class CloudTests(unittest.TestCase):
         with self.assertRaises(KeyError):self.db.save('bob','test-run',{'time':2},'completed')
         self.assertEqual(self.db.records('alice','test-run')['seconds'],1)
 
+    def test_background_database_failure_does_not_stop_ticks_and_recovers(self):
+        visitor=self.visitor();rid=self.launch(visitor)
+        session=next(iter(self.manager.sessions.values()))
+        before=session.snapshot()['time']
+        with patch.object(self.db,'save',side_effect=StorageUnavailable('offline')):
+            deadline=time.monotonic()+5
+            while not session.store.error and time.monotonic()<deadline:time.sleep(.05)
+            self.assertIsNotNone(session.store.error)
+            self.assertGreater(session.snapshot()['time'],before)
+        session.store.flush(timeout=10)
+        self.assertIsNone(session.store.error)
+        self.assertGreater(self.db.records(session.store.owner,rid)['seconds'],before)
+
+    def test_releasing_session_stops_every_robot_process(self):
+        visitor=self.visitor();self.launch(visitor)
+        session=next(iter(self.manager.sessions.values()))
+        processes=list(session.runtime.processes)
+        session.release()
+        self.assertTrue(all(not process.is_alive() for process in processes))
+        self.assertEqual(session.snapshot()['status'],'interrupted')
+        self.assertTrue(session.snapshot()['released'])
+
 
 if __name__=='__main__':unittest.main()

@@ -29,6 +29,7 @@ class CloudSession(Session):
         self.last_seen = time.monotonic()
         self.started_wall = 0
         self.last_snapshot = None
+        self.command_lock = threading.Lock()
         self.thread = threading.Thread(target=self.loop, daemon=True)
         self.thread.start()
 
@@ -97,6 +98,7 @@ class Manager:
         self.sessions = OrderedDict()
         self.lock = threading.RLock()
         self.rates = OrderedDict()
+        self.starting = set()
         self.stop = threading.Event()
         self.cleaner = threading.Thread(target=self.cleanup, daemon=True)
         self.cleaner.start()
@@ -153,25 +155,31 @@ class Manager:
         if action not in ('start','demo','speed','pause','maintenance','network','kill','aisle','job'):
             raise ValueError('Unknown action')
         session = self.get(owner)
-        # Serialize admission, not the simulation ticks of each independent visitor.
-        with self.lock, session.lock:
-            if action in ('start','demo'):
-                session.options(options if action == 'start' else {})
-                active = sum(s.runtime is not None for s in self.sessions.values() if s is not session)
-                if active >= self.max_active:
-                    for other in self.sessions.values():
-                        if other is not session and other.runtime and other.status in ('completed','failed','timeout'):
-                            other.release()
-                    active = sum(s.runtime is not None for s in self.sessions.values() if s is not session)
-                if active >= self.max_active:
-                    raise CapacityError('Both demo slots are in use. Watch the recorded demo or retry shortly.')
+        # SQL and flush barriers do not hold the simulation's tick lock.
+        with session.command_lock:
             signature = json.dumps([action, options], sort_keys=True, separators=(',', ':'), allow_nan=False)
             previous = self.db.begin_command(owner, request_id, signature)
             if previous is not None:
                 return dict(previous, replayed=True)
             try:
-                result = session.execute(action, options, request_id)
+                if action in ('start','demo'):
+                    session.options(options if action == 'start' else {})
+                    with self.lock:
+                        for other in self.sessions.values():
+                            if other is not session and other.runtime and other.status in ('completed','failed','timeout'):
+                                other.release()
+                        active = sum(s.runtime is not None or key in self.starting for key,s in self.sessions.items() if s is not session)
+                        if active >= self.max_active:
+                            raise CapacityError('Both demo slots are in use. Watch the recorded demo or retry shortly.')
+                        self.starting.add(owner)
+                try:
+                    result = session.execute(action, options, request_id)
+                finally:
+                    with self.lock:
+                        self.starting.discard(owner)
                 session.store.flush()
+            except CapacityError as exc:
+                result = {'ok':False,'error':str(exc),'http_status':429}
             except (ValueError, TypeError) as exc:
                 result = {'ok':False, 'error':str(exc)}
             # A failure here leaves a durable pending command. Retrying cannot duplicate it.
@@ -240,6 +248,8 @@ def make_cloud_handler(manager, secure=True):
         def respond(self, data, kind='application/json', status=200, **kwargs):
             if status >= 500:
                 data = {'error':'The service is temporarily unavailable. Retry shortly; saved history is retained.'}
+            if kind.startswith('text/html') and isinstance(data, str):
+                data = data.replace('Local workspace', 'Private visitor workspace').replace('Runs on your laptop.<br>Simulation data stays here.', 'Independent simulated robots.<br>History belongs to this browser.').replace('Each run saves snapshots to local SQLite storage.', 'Sampled run history is saved to Neon for up to 7 days, subject to the latest-80-run limit. Keep your browser cookies to retain access.').replace('The local server must remain running.', 'The simulation backend must be available.')
             return super().respond(data, kind, status, **kwargs)
 
         def identity(self):
@@ -309,7 +319,7 @@ def make_cloud_handler(manager, secure=True):
                 if not path.startswith('/api/'):
                     raise ValueError('Unknown action')
                 result = manager.execute(owner, path[5:], options, self.headers.get('X-FleetMesh-Request-ID'))
-                return self.respond(result, status=200 if result.get('ok') else 400)
+                return self.respond(result, status=200 if result.get('ok') else result.get('http_status',400))
             except CapacityError as exc:
                 return self.respond({'error':str(exc)}, status=429)
             except (ValueError, TypeError) as exc:

@@ -285,7 +285,7 @@ def make_handler(session):
                     if len(parts)>4 or (len(parts)==4 and parts[3] not in ('csv','report','insights')):raise KeyError('Run not found')
                     with session.lock:
                         if rid==session.run_id:session.persist()
-                        record=session.store.get(rid,frames=parse_qs(parsed.query).get('frames')==['1'] or path.endswith('/insights'))
+                    record=session.store.get(rid,frames=parse_qs(parsed.query).get('frames')==['1'] or path.endswith('/insights'))
                     if len(parts)==4 and parts[3]=='insights':return self.respond(summarize_run(record))
                     if len(parts)==4 and parts[3]=='report':
                         return self.respond(run_report(record),'text/html; charset=utf-8',filename='fleetmesh-report-'+rid[:8]+'.html')
