@@ -1,5 +1,14 @@
 # FleetMesh 1.9
 
+## Shared-path decision update
+
+Select **Explore shared paths** in the console to watch three independent robots
+compete for shared routes. Inspect missing peer permissions, reported conflicting
+zones, stale information and separate simulated occupancy. Decisions are retained
+in saved replay and reports. See [implementation and judge demo](docs/SHARED_PATHS.md).
+This update is locally verified; production deployment is separate.
+
+
 Cloud integration prepares a static Vercel frontend and adds bounded visitor sessions
 on a Render Python backend with scoped Neon PostgreSQL history. Render/Neon are live;
 public Vercel access is still awaiting account access. The local SQLite launcher remains

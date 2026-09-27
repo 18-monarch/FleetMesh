@@ -154,7 +154,7 @@ class Manager:
     def execute(self, owner, action, options, request_id):
         if not re.fullmatch(r'[A-Za-z0-9_-]{8,80}', request_id or ''):
             raise ValueError('A valid request ID is required.')
-        if action not in ('start','demo','speed','pause','maintenance','network','kill','aisle','job'):
+        if action not in ('start','demo','conflict','speed','pause','maintenance','network','kill','aisle','job'):
             raise ValueError('Unknown action')
         session = self.get(owner)
         # SQL and flush barriers do not hold the simulation's tick lock.
@@ -166,7 +166,7 @@ class Manager:
             if previous is not None:
                 return dict(previous, replayed=True)
             try:
-                if action in ('start','demo'):
+                if action in ('start','demo','conflict'):
                     session.options(options if action == 'start' else {})
                     with self.lock:
                         for other in self.sessions.values():

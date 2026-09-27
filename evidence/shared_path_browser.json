@@ -1,0 +1,46 @@
+{
+  "passed": true,
+  "source": "Local browser / HTTP / independent UDP agents / SQLite / saved replay",
+  "start": {
+    "id": "baffb00118a44f389b148ce3dd76da1c",
+    "time": 2.5,
+    "pids": [
+      87,
+      88,
+      89
+    ]
+  },
+  "outcome": {
+    "complete": 6,
+    "jobs": 6,
+    "collisions": 0,
+    "time": 127.5
+  },
+  "frames": 130,
+  "mobile": {
+    "viewport": 390,
+    "document": 390
+  },
+  "console_errors": [],
+  "checks": [
+    "shared-zone wait",
+    "three distinct processes",
+    "occupied closure and cancellation",
+    "stale peer information",
+    "network restoration and completion",
+    "refresh",
+    "saved conflict evidence",
+    "HTML report",
+    "read-only replay",
+    "older recording compatibility",
+    "keyboard focus",
+    "reduced-motion context",
+    "mobile width"
+  ],
+  "review_date": "2026-09-27",
+  "base_commit": "144e6ce",
+  "limits": [
+    "Local verification only; production and Neon were not retested.",
+    "One observed run, not a benchmark or universal safety claim."
+  ]
+}

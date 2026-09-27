@@ -14,3 +14,13 @@ body.presenting .sidebar,body.presenting .page-heading,body.presenting .control-
 @media(max-width:1180px){.demo-panel .surface-header{align-items:flex-start;flex-direction:column}.review-hero{align-items:flex-start;flex-direction:column}.review-grid{grid-template-columns:1fr}.inspector-facts{grid-template-columns:repeat(2,1fr)}.topbar{padding-left:20px;padding-right:20px}.top-actions{gap:8px}.button{padding-left:12px;padding-right:12px}}
 @media(max-width:680px){.top-actions{flex-wrap:wrap}.topbar{height:auto;min-height:76px;padding-top:12px;padding-bottom:12px}.top-actions .chip{order:3;flex-basis:100%;text-align:center}.demo-launch{width:100%}.demo-launch button{flex:1;white-space:normal;line-height:1.5}.demo-steps{gap:14px}.run-result{align-items:flex-start;flex-direction:column;padding:18px}.robot-inspector{padding:16px}.inspector-heading{gap:8px}.review-hero h2{font-size:25px}.review-check>div{align-items:flex-start}.review-check .status{white-space:nowrap}.review-checks,.review-waits{padding-left:16px;padding-right:16px}.review-actions{flex-wrap:wrap}.replay-controls{padding:12px}.replay-controls input{order:5;flex-basis:100%}body.presenting main{padding:18px}body.presenting .breadcrumb{display:none}body.presenting .robot-grid{grid-template-columns:1fr}body.presenting .topbar{height:auto;padding:12px 18px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+
+/* Live conflict explanations; deliberately separate observer and peer evidence. */
+.decision-panel{margin-top:16px;padding:16px;border:1px solid #315365;border-radius:12px;background:#0b202b}
+.decision-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.decision-heading h3{margin:0;font-size:14px}.decision-panel p{line-height:1.6}.decision-panel ul{padding-left:20px;line-height:1.8;font-size:13px}
+.decision-panel .status{white-space:normal}.decision-panel .fine{color:#b1c5d0}
+.traffic-surface{margin:20px 0}.traffic-summary{padding:16px 22px;color:#dbe9f0;line-height:1.8;font-size:13px;overflow-wrap:anywhere}
+.traffic-surface details{padding:0 22px 18px}.traffic-surface summary{cursor:pointer;color:#b8d0df;font-size:13px}
+.legend-line.occupied{background:#f7c16b}.legend-circle.requested{border:2px dashed #f7c16b;background:transparent}
+@media(max-width:650px){.demo-launch{flex-wrap:wrap}.decision-panel{padding:12px}.traffic-surface .surface-header{flex-wrap:wrap}.traffic-summary{padding:12px}.decision-panel li{overflow-wrap:anywhere}}
