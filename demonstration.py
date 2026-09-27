@@ -68,6 +68,8 @@ def run_report(record):
     rows = ''.join('<tr>' + ''.join('<td>' + e(j.get(k, '')) + '</td>' for k in
                    ('id', 'owner', 'state', 'pickup', 'drop', 'priority', 'delivered_at', 'completed_at')) + '</tr>'
                    for j in snap.get('jobs', []))
+    decisions = ''.join('<li><strong>R'+e(r['id']+1)+'</strong>: '+e(r.get('decision', {}).get('summary', r.get('reason', 'Not recorded')))+'<br>'+e(r.get('decision', {}).get('next', 'Detailed decisions were not recorded in this older snapshot.'))+'</li>' for r in snap.get('robots', []))
+    decision_evidence = json.dumps([{'robot': r['id'], 'alive': r.get('alive'), 'decision': r.get('decision')} for r in snap.get('robots', [])], indent=2)
     actions = ''.join(f"<li>{e(a['time'])} s: {e(a['detail'])}</li>" for a in demo.get('actions', []))
     done = bool(snap.get('total_jobs')) and snap.get('complete') == snap.get('total_jobs')
     outcome = 'All missions returned to dock' if done else 'Run incomplete at this snapshot'
@@ -80,5 +82,6 @@ def run_report(record):
 <h2>Demonstration actions</h2><p>{e(demo.get('scope', 'No scripted demonstration was attached to this run.'))}</p><ol>{actions}</ol>
 <p>Scheduled disturbances complete: {e(demo.get('schedule_complete', 'not applicable'))}. Urgent mission: {e(demo.get('urgent_job', 'not applicable'))}, state: {e(demo.get('urgent_state', 'not applicable'))}.</p>
 <h2>Mission ledger</h2><p>Owner uses zero-based robot IDs (0 means Robot 1).</p><div class="scroll"><table><thead><tr><th>Job</th><th>Owner</th><th>State</th><th>Pickup</th><th>Delivery</th><th>Priority</th><th>Delivered at</th><th>Docked at</th></tr></thead><tbody>{rows}</tbody></table></div>
+<h2>Controller decisions at this snapshot</h2><p>Peer reports may be stale. These explanations do not issue grants. Offline robots retain their reservations; their last controller decision is historical.</p><ul>{decisions}</ul><details><summary>Recorded decision evidence</summary><pre>{e(decision_evidence)}</pre></details>
 <h2>Interpretation</h2><p>This report describes one persisted simulation snapshot. It does not establish a speed improvement against a baseline, physical robot safety, or reliable operation on real Wi-Fi. A zero collision count is a finite observation. Waiting during interruption and progress after restoration must be checked in the replay. A stopped peer can halt new grants indefinitely.</p>
 <p>The supervisor supplies simulated physics and injects disturbances. Independent robot processes decide routes and exchange permissions over local UDP. Physical edge hardware, noisy localization and braking remain unvalidated. Battery estimates are illustrative.</p></body></html>'''

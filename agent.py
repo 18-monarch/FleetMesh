@@ -279,12 +279,51 @@ class Agent:
             length -= math.dist(self.layout['nodes'][remaining[0]], self.pos)
         return max(0., length / self.speed)
 
+    def decision(self):
+        """Explain this controller's own evidence; never query the supervisor."""
+        result = {'kind': 'moving' if self.active else 'idle', 'summary': self.reason,
+                  'requested_zones': [], 'missing_peers': [], 'peers': [],
+                  'next': 'Continue the current mission.' if self.active else 'Wait for eligible work.'}
+        if self.request:
+            req = self.request
+            result.update(kind='waiting_permission', requested_zones=list(req['zones']),
+                          request_key=list(req['key']),
+                          wait_seconds=round(max(0., self.t-req['since']), 2))
+            for rid in range(self.count):
+                if rid == self.id or rid in req['grants']:
+                    continue
+                result['missing_peers'].append(rid)
+                peer = self.peer.get(rid)
+                age = max(0., self.t-peer['time']) if peer else None
+                stale = age is None or age > 2
+                overlap = sorted(set(req['zones']).intersection(peer.get('held', []))) if peer else []
+                competing = sorted(set(req['zones']).intersection(peer.get('pending_zones', []))) if peer else []
+                key = peer.get('request_key') if peer else None
+                earlier = bool(competing and key and tuple(key) < req['key'])
+                cause = 'unconfirmed' if stale else 'held_zones' if overlap else 'earlier_request' if earlier else 'awaiting_grant'
+                result['peers'].append({'id': rid, 'cause': cause, 'zones': overlap if overlap else competing if earlier else [],
+                                        'age_seconds': round(age, 2) if age is not None else None, 'stale': stale})
+            names = ', '.join('R'+str(rid+1) for rid in result['missing_peers'])
+            result['summary'] = 'Waiting for permission from '+names if names else 'All grants received; acquiring route.'
+            result['next'] = 'Remain stopped until every peer grants this exact request. Missing permission is never inferred from silence.'
+        elif self.reason == 'Local proximity stop':
+            result.update(kind='proximity_stop', next='Wait until the locally observed robot clears the stopping threshold.')
+        elif self.reason == 'Pickup or destination unreachable':
+            result.update(kind='no_route', next='Wait for a map change; no feasible pickup/delivery route is currently known.')
+        elif self.reason == 'Aisle closed; holding reserved route':
+            result.update(kind='blocked', next='Retreat only on an available owned route; otherwise wait for reopening.')
+        elif self.stage == 'retreat':
+            result.update(kind='rerouting', next='Return through owned zones, then plan a new route from the dock.')
+        elif self.stage == 'reserving':
+            result.update(kind='ready', summary='Route permissions acquired.', next='Begin movement on the next controller step.')
+        return result
+
     def state(self):
         return {'id': self.id, 'position': self.pos, 'node': self.node, 'home': self.home,
                 'active': self.active, 'stage': self.stage, 'available': self.available,
                 'held': sorted(self.held), 'request': self.request['zone'] if self.request else None,
                 'grants': len(self.request['grants']) if self.request else 0,
-                'route': self.route[self.route_index:], 'reason': self.reason,
+                'route': self.route[self.route_index:], 'reason': self.reason, 'decision': self.decision(),
                 'wait_seconds': round(self.wait_seconds, 2), 'distance': round(self.distance, 2),
                 'battery': round(max(0., 100-self.distance*.025), 1), 'model_calls': self.model_calls,
                 'transfers': self.transfers, 'reroutes': self.reroutes, 'alive': True,
@@ -378,7 +417,8 @@ class Agent:
             self.send('INFO', {'time': self.t, 'held': sorted(self.held), 'request': self.request['zone'] if self.request else None,
                                'remaining': self.remaining_seconds(), 'available': self.available, 'pending_zones': self.request['zones'] if self.request else [],
                                'position': list(self.pos), 'intent': self.route[self.route_index:self.route_index+4],
-                               'stage': self.stage, 'job': self.active})
+                               'stage': self.stage, 'job': self.active,
+                               'request_key': list(self.request['key']) if self.request else None})
             for job in self.jobs.values():
                 if job['owner'] == self.id:
                     self.send('JOB', dict(job))
@@ -387,4 +427,13 @@ class Agent:
             if self.maps:
                 self.send('MAP', self.maps)
             self.last_emit = self.t
+        decision = self.decision()
+        signature = (decision['kind'], decision['summary'], tuple(
+            (p['id'], p['cause'], tuple(p['zones'])) for p in decision['peers']))
+        if signature != getattr(self, '_decision_signature', None):
+            self._decision_signature = signature
+            detail = decision['summary']
+            for peer in decision['peers']:
+                detail += f" R{peer['id']+1}: {peer['cause']}" + (' ['+', '.join(peer['zones'])+']' if peer['zones'] else '') + '.'
+            self.event('decision', detail)
         return {'velocity': velocity, 'messages': self.out, 'state': self.state(), 'jobs': list(self.jobs.values())}

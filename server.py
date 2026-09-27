@@ -110,12 +110,15 @@ class Session:
             if self.runtime:state=self.runtime.world.snapshot()
             else:state={'time':0,'robots':[],'jobs':[],'events':[],'collisions':0,'minimum_separation':None,'complete':0,'delivered':0,'total_jobs':0,'wait_seconds':0,'distance':0,'transfers':0,'reroutes':0,'map_changes':{},'pending_closures':[],'partitioned':False,'map':build_map()}
             return deepcopy(dict(state,run_id=self.run_id,playing=self.playing,rate=self.rate,status=self.status,error=self.error,
-                        backend='Independent processes / authenticated UDP',model_available=self.valid_model(),version=VERSION,
+                        features=['conflict_explanations'],backend='Independent processes / authenticated UDP',model_available=self.valid_model(),version=VERSION,
                         demonstration=self.demonstration.snapshot(self.runtime.world) if self.demonstration and self.runtime else None,
                         policy=self.runtime.config['mode'] if self.runtime else 'heuristic'))
     def command(self,action,options):
         with self.lock:
             if action=='start':self.start(options);return
+            if action=='conflict':
+                self.start({'map':'compact','scenario':'congestion','mode':'heuristic','seed':200,'robots':3,'jobs':6})
+                self.rate=2.;self.persist();return
             if action=='demo':
                 self.start({'map':'warehouse','scenario':'normal','mode':'heuristic','seed':200,'robots':3,'jobs':6})
                 self.demonstration=Demonstration();self.rate=8.;self.persist();return

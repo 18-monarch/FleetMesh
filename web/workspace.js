@@ -47,6 +47,7 @@ function renderWorkspace(state, isReplay) {
   $('inspect-robot').disabled = !robots.length;
   $('inspect-robot').value = String(selectedRobot);
   const robot = robots.find(item => item.id === selectedRobot);
+  renderDecision(state, robot, isReplay);
   put('inspect-status', robot ? !robot.alive ? 'Offline' : title(robot.stage) : 'No active run');
   put('inspect-reason', robot?.reason || 'Launch a live run or watch the recorded demo to explore local decisions.');
   const mission = state.jobs?.find(job => job.id === robot?.active);
@@ -155,4 +156,50 @@ function renderReview(data, source) {
   put('review-actions-count', `${data.transfers} ownership transfers · ${data.reroutes} route recoveries · ${data.actions.length} scripted disturbances`);
   $('review-ledger').innerHTML = data.missions.map(job => `<tr><td><strong>${escapeHTML(job.id)}</strong>${job.priority === 3 ? ' <span class="urgent-label">Urgent</span>' : ''}</td><td>Robot ${job.owner + 1}</td><td>${escapeHTML(title(job.state))}</td><td>${job.delivery_seconds === null ? '—' : number(job.delivery_seconds) + ' s'}</td><td>${job.dock_seconds === null ? '—' : number(job.dock_seconds) + ' s'}</td></tr>`).join('');
   $('review-limits').innerHTML = data.limits.map(limit => `<li>${escapeHTML(limit)}</li>`).join('');
+}
+
+
+// Observations only: this panel never grants permission or changes a robot route.
+function renderDecision(state, robot, isReplay) {
+  const decision = robot?.decision;
+  const offline = robot && !robot.alive;
+  put('decision-kind', offline ? 'Offline' : decision ? title(decision.kind) : 'Not recorded');
+  put('decision-summary', offline ? `R${robot.id+1} process is offline. Its reservations remain held.` :
+    decision?.summary || robot?.reason || 'Start a run to inspect controller decisions.');
+  const causes = {
+    held_zones: 'last reported holding conflicting zones',
+    earlier_request: 'last reported an earlier conflicting request',
+    awaiting_grant: 'grant has not arrived; no confirmed blocking cause',
+    unconfirmed: 'peer information is missing or stale; permission remains required'
+  };
+  $('decision-peers').innerHTML = offline ? '' : (decision?.peers || []).map(peer =>
+    `<li><strong>R${peer.id+1}</strong> ${escapeHTML(causes[peer.cause] || 'awaiting permission')}${peer.zones.length ? ': '+escapeHTML(peer.zones.join(', ')) : ''}. <span class="fine">${peer.age_seconds === null ? 'No peer observation.' : 'Observation age '+number(peer.age_seconds)+' simulated s.'}</span></li>`).join('');
+  put('decision-next', offline ? 'Start a new experiment for recovery. Silence does not release occupied space.' : decision?.next || 'Detailed decision evidence was not stored in this older frame.');
+  put('decision-source', `${isReplay ? 'Recorded' : 'Latest'} controller observation${decision ? ' · grants must match the request ID.' : ''} Simulator occupancy below is separate from what each robot knows.`);
+  put('traffic-time', state.traffic ? `${number(state.time)} simulated s${isReplay ? ' / recorded' : ''}` : 'Not recorded');
+  const roads = state.traffic?.roads || [];
+  const occupied = roads.filter(road => road.occupied_by.length);
+  $('traffic-summary').textContent = state.traffic ? occupied.length ?
+    occupied.map(road => `${road.edge.replace(':', ' – ')}: ${road.occupied_by.map(id=>'R'+(id+1)).join(', ')}`).join(' · ') :
+    'No robot currently intersects a road section; robots may be in private docks.' :
+    'Section occupancy was not recorded in this frame. Existing routes and robot positions remain available.';
+  $('traffic-zones').innerHTML = (state.traffic?.zones || []).map(zone =>
+    `<tr><td>${escapeHTML(zone.node)}</td><td>${zone.reserved_by.map(id=>'R'+(id+1)).join(', ') || 'None'}</td><td>${zone.requested_by.map(id=>'R'+(id+1)).join(', ') || 'None'}</td></tr>`).join('') || '<tr><td colspan="3">No recorded reservation detail.</td></tr>';
+}
+
+function drawTraffic(ctx, state, xy) {
+  const nodes = state.map.nodes;
+  for (const road of state.traffic?.roads || []) {
+    if (!road.occupied_by.length || road.closed) continue;
+    const [a,b] = road.edge.split(':');
+    ctx.beginPath();ctx.moveTo(...xy(nodes[a]));ctx.lineTo(...xy(nodes[b]));
+    ctx.strokeStyle='#f7c16b66';ctx.lineWidth=17;ctx.stroke();
+  }
+  const robot = state.robots?.find(item=>item.id===selectedRobot);
+  for (const node of robot?.decision?.requested_zones || []) {
+    if (!nodes[node]) continue;
+    const [x,y] = xy(nodes[node]);
+    ctx.beginPath();ctx.arc(x,y,14,0,Math.PI*2);ctx.setLineDash([3,3]);
+    ctx.strokeStyle='#f7c16b';ctx.lineWidth=2;ctx.stroke();ctx.setLineDash([]);
+  }
 }

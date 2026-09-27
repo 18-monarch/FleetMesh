@@ -50,6 +50,22 @@ class CloudTests(unittest.TestCase):
         except ValueError: result=raw.decode()
         return status,result,result_headers
 
+    def test_conflict_action_is_isolated_and_retry_safe(self):
+        visitor = self.visitor()
+        other = self.visitor()
+        headers = {'X-FleetMesh-Request-ID': 'conflict-start-123'}
+        status, result, _ = self.request('/api/conflict', visitor, {}, headers)
+        self.assertEqual(status, 200)
+        status, again, _ = self.request('/api/conflict', visitor, {}, headers)
+        self.assertEqual(status, 200)
+        self.assertEqual(result['run_id'], again['run_id'])
+        status, state, _ = self.request('/api/state', visitor)
+        self.assertEqual(state['map']['name'], 'compact')
+        self.assertEqual(len(state['robots']), 3)
+        self.assertEqual(state['rate'], 2.)
+        self.assertIn('traffic', state)
+        self.assertEqual(self.request('/api/runs/'+result['run_id'], other)[0], 404)
+
     def visitor(self):
         status,data,headers=self.request('/api/session',headers={'X-FleetMesh-Client':'web'})
         self.assertEqual(status,200)

@@ -40,14 +40,21 @@ class World:
     def event(self, kind, detail, robot=None):
         self.events.append({'time': round(self.time, 2), 'robot': robot, 'kind': kind, 'detail': detail})
 
-    def edge_occupied(self, key):
+    def edge_occupants(self, key):
+        """Robots whose simulated discs touch a finite road segment."""
         a, b = key.split(':')
         pa, pb = self.layout['nodes'][a], self.layout['nodes'][b]
-        for pos in self.positions:
-            # A physical barrier is introduced only after the whole segment is clear.
-            if math.dist(pa, pos)+math.dist(pos, pb) <= math.dist(pa, pb)+.02:
-                return True
-        return False
+        dx, dy = pb[0]-pa[0], pb[1]-pa[1]
+        norm = dx*dx+dy*dy
+        occupants = []
+        for rid, pos in enumerate(self.positions):
+            t = max(0., min(1., ((pos[0]-pa[0])*dx+(pos[1]-pa[1])*dy)/norm)) if norm else 0.
+            if math.dist(pos, (pa[0]+t*dx, pa[1]+t*dy)) <= RADIUS:
+                occupants.append(rid)
+        return occupants
+
+    def edge_occupied(self, key):
+        return bool(self.edge_occupants(key))
 
     def set_edge(self, key, blocked):
         valid = {edge_key(a, b) for a, b in self.layout['edges'] if a.startswith('N') and b.startswith('N')}
@@ -111,6 +118,27 @@ class World:
     def done(self):
         return bool(self.catalog) and all(j['state'] == 'done' for j in self.jobs())
 
+    def traffic(self):
+        """Read-only ground truth for the observer, not controller input or grants.
+
+        Occupancy is disc-to-road-centreline proximity, including endpoints. It
+        intentionally includes stopped/dead robots and is not a clearance proof.
+        """
+        roads = []
+        for a, b in self.layout['edges']:
+            if not (a.startswith('N') and b.startswith('N')):
+                continue
+            key = edge_key(a, b)
+            occupants = self.edge_occupants(key)
+            roads.append({'edge': key, 'occupied_by': occupants,
+                          'closed': bool(self.map_changes.get(key, {}).get('blocked')),
+                          'closure_pending': key in self.pending_closures})
+        zones = [{'node': node,
+                  'reserved_by': [r['id'] for r in self.states if node in r.get('held', [])],
+                  'requested_by': [r['id'] for r in self.states if node in r.get('decision', {}).get('requested_zones', [])]}
+                 for node in self.layout['stations']]
+        return {'roads': roads, 'zones': zones, 'source': 'Simulator occupancy and controller-reported reservations. Observer only.'}
+
     def snapshot(self, detailed=True):
         jobs = self.jobs()
         robots = [dict(s, position=self.positions[i], alive=i not in self.dead) for i, s in enumerate(self.states)]
@@ -122,7 +150,7 @@ class World:
                   'distance': round(sum(r['distance'] for r in robots), 2),
                   'transfers': sum(r['transfers'] for r in robots), 'reroutes': sum(r['reroutes'] for r in robots),
                   'map_changes': self.map_changes, 'pending_closures': sorted(self.pending_closures),
-                  'partitioned': self.partitioned}
+                  'partitioned': self.partitioned, 'traffic': self.traffic()}
         if detailed:
             result['events'] = self.events[-80:]
             result['map'] = self.layout
